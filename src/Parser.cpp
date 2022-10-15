@@ -2,4 +2,5 @@
 
 Parser::Parser(std::string lexedString) {
 
+    // Соси член
 }
