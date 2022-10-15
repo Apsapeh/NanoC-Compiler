@@ -1,0 +1,38 @@
+// Без строк
+/*Cumment*/
+
+#define true 1 // Чтобы VSC не ругалось на ошибки
+
+int ass(int num)
+{
+	int a = num;
+	return(a);
+}
+
+int main(int a)
+{
+	int num1 = 5 + 3;
+	int num2 = num1;
+	int num3 = num1 + num2 + num3;
+
+	if (num1 < 3)
+	{
+		int num4 = ass(1);
+	}
+	else{int a = 3;}
+
+	int num4 = 0;
+    int num9 = 0;
+	while (true)
+	{
+		if(num4 == 12345)
+		{
+			break();
+		}
+		else
+		{
+			num9 = num4 + 1;
+		}
+	}
+}
+
