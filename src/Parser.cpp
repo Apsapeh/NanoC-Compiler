@@ -2,5 +2,5 @@
 
 Parser::Parser(std::string lexedString) {
 
-    // Соси член kj[
+    // Соси член kj[jhughffgdfm 98989
 }
