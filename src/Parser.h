@@ -1,15 +1,10 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
 
-#ifndef NANOC_COMPILER_PARSER_H
-#define NANOC_COMPILER_PARSER_H
-
-
 class Parser {
 public:
-    Parser(std::string lexedString);
+    Parser(std::vector<std::vector<std::string>> TokenizedSource,
+           std::vector<std::vector<std::string>> TokensInfo);
 };
-
-
-#endif //NANOC_COMPILER_PARSER_H

@@ -7,7 +7,9 @@
 
 class Lexer{
 private:
-    std::string lexedString = "";
+    //std::string lexedString = "";
+    std::vector <std::vector<std::string>> TokenizedSource;
+    std::vector <std::vector<std::string>> TokensInfo;
     bool   findB(std::string* beginIterator, std::string* endIterator, std::string findedObject);
     int8_t isNormString(std::string &str);
     bool   isNumber(std::string &str);
@@ -29,7 +31,9 @@ public:
     };
 
     Lexer(std::string sourceCode);
-    std::string getLexedString();
+    //std::string getLexedString();
+    std::vector<std::vector<std::string>> getTokenizedSource();
+    std::vector<std::vector<std::string>> getTokensInfo();
 
 
 private: // Т.к структура Expression объявлена ниже, чем первый private

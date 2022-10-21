@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     //std::vector 
 
     Lexer lexer(source_code);
-    Parser parser(lexer.getLexedString());
+    Parser parser(lexer.getTokenizedSource(), lexer.getTokensInfo());
 
 
     // // Перебираем и ищем переменные, вызовы фунция, арифметические выражения и т.д

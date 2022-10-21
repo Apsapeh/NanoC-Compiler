@@ -118,13 +118,16 @@ Lexer::Lexer(std::string sourceCode)
         bool second_exp_part = false;
         bool is_condition = false;
 
+        std::vector<std::string> tempVecTok;
+        std::vector<std::string> tempVecTokInfo;
+
         ++string_num;
         Expression temp_expression;
         for (uint32_t str_num = 0; str_num < splitted.size(); ++str_num)
         {
             std::string exp_string = splitted[str_num];
-            if (str_num > 0 and str_num < splitted.size())
-                lexedString += " ";
+            /*if (str_num > 0 and str_num < splitted.size())
+                lexedString += " ";*/
 
             if (exp_string == "(")
             {
@@ -136,7 +139,9 @@ Lexer::Lexer(std::string sourceCode)
 
                 if (str_num < splitted.size()-1 and splitted[str_num+1] == "{" and is_condition)
                 {
-                    this->lexedString += "COND_END";
+                    //this->lexedString += "COND_END";
+                    tempVecTok.push_back("COND_END");
+                    tempVecTokInfo.push_back("~~~");
                     is_condition = false;
                     is_args = false;
                     continue;
@@ -144,7 +149,9 @@ Lexer::Lexer(std::string sourceCode)
 
                 if ((str_num < splitted.size()-1 and splitted[str_num+1] == "{" and is_function_definition))
                 {
-                    this->lexedString += "ARGS_END";
+                    //this->lexedString += "ARGS_END";
+                    tempVecTok.push_back("ARGS_END");
+                    tempVecTokInfo.push_back("~~~");
                     is_function_definition = false;
                     is_args = false;
                     continue;
@@ -152,7 +159,9 @@ Lexer::Lexer(std::string sourceCode)
 
                 if (is_function_call)
                 {
-                    this->lexedString += "ARGS_END";
+                    //this->lexedString += "ARGS_END";
+                    tempVecTok.push_back("ARGS_END");
+                    tempVecTokInfo.push_back("~~~");
                     is_function_call = false;
                     is_args = false;
                     continue;
@@ -162,105 +171,139 @@ Lexer::Lexer(std::string sourceCode)
             if (exp_string == "{")
             {
                 // BEGIN
-                this->lexedString += "BEGIN";
+                //this->lexedString += "BEGIN";
+                tempVecTok.push_back("BEGIN");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "}")
             {
                 // END
-                this->lexedString += "END";
+                //this->lexedString += "END";
+                tempVecTok.push_back("END");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
 
             if (exp_string == "=")
             {
                 // ASSIGN
-                this->lexedString += "ASSIGN";
+                //this->lexedString += "ASSIGN";
+                tempVecTok.push_back("ASSIGN");
+                tempVecTokInfo.push_back("~~~");
                 second_exp_part = true;
                 continue;
             }
             if (exp_string == "+")
             {
                 // ADD
-                this->lexedString += "ADD";
+                //this->lexedString += "ADD";
+                tempVecTok.push_back("ADD");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "-")
             {
                 // MINUS
-                this->lexedString += "BEGIN";
+                //this->lexedString += "MINUS";
+                tempVecTok.push_back("MINUS");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "*")
             {
                 // MULTIPLE
-                this->lexedString += "MULTIPLE";
+                //this->lexedString += "MULTIPLE";
+                tempVecTok.push_back("MULTIPLE");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "/")
             {
                 // DIVIDE
-                this->lexedString += "DIVIDE";
+                //this->lexedString += "DIVIDE";
+                tempVecTok.push_back("DIVIDE");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "<")
             {
                 // LLESS
-                this->lexedString += "LLESS";
+                //this->lexedString += "LLESS";
+                tempVecTok.push_back("LLESS");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }if (exp_string == ">")
             {
                 // LMORE
-                this->lexedString += "LMORE";
+                //this->lexedString += "LMORE";
+                tempVecTok.push_back("LMORE");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "==")
             {
                 // LEQUAL
-                this->lexedString += "LEQUAL";
+                //this->lexedString += "LEQUAL";
+                tempVecTok.push_back("LEQUAL");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "<=")
             {
                 // LLESS_EQ
-                this->lexedString += "LLESS_EQ";
+                //this->lexedString += "LLESS_EQ";
+                tempVecTok.push_back("LLESS_EQ");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == ">=")
             {
                 // LMORE_EQ
-                this->lexedString += "LMORE_EQ";
+                //this->lexedString += "LMORE_EQ";
+                tempVecTok.push_back("LMORE_EQ");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "!=")
             {
                 // LNOT_EQ
-                this->lexedString += "LNOT_EQ";
+                //this->lexedString += "LNOT_EQ";
+                tempVecTok.push_back("LNOT_EQ");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "and" or exp_string == "&&")
             {
                 // LAND
-                this->lexedString += "LAND";
+                //this->lexedString += "LAND";
+                tempVecTok.push_back("LAND");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if (exp_string == "or" or exp_string == "||")
             {
                 // LOR
-                this->lexedString += "LOR";
+                //this->lexedString += "LOR";
+                tempVecTok.push_back("LOR");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
 
             if(exp_string == "true")
             {
                 // TRUE
-                this->lexedString += "TRUE";
+                //this->lexedString += "TRUE";
+                tempVecTok.push_back("TRUE");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
             if(exp_string == "false")
             {
                 // TRUE
-                this->lexedString += "FALSE";
+                //this->lexedString += "FALSE";
+                tempVecTok.push_back("FALSE");
+                tempVecTokInfo.push_back("~~~");
                 continue;
             }
 
@@ -272,7 +315,11 @@ Lexer::Lexer(std::string sourceCode)
                 if (str_num < splitted.size()-1 and splitted[str_num+1] == "(")
                 {
                     // IF COND_BEGIN
-                    this->lexedString += "IF COND_BEGIN";
+                    //this->lexedString += "IF COND_BEGIN";
+                    tempVecTok.push_back("IF");
+                    tempVecTokInfo.push_back("~~~");
+                    tempVecTok.push_back("COND_BEGIN");
+                    tempVecTokInfo.push_back("~~~");
                     is_args = true;
                     is_condition = true;
                     ++str_num;
@@ -288,7 +335,9 @@ Lexer::Lexer(std::string sourceCode)
             {
                 if (splitted.size() == 2 and splitted[1] == "{")
                 {
-                    this->lexedString += "ELSE";
+                    //this->lexedString += "ELSE";
+                    tempVecTok.push_back("ELSE");
+                    tempVecTokInfo.push_back("~~~");
                     continue;
                 }
                 else
@@ -311,7 +360,11 @@ Lexer::Lexer(std::string sourceCode)
                 if (str_num < splitted.size()-1 and splitted[str_num+1] == "(")
                 {
                     // IF COND_BEGIN
-                    this->lexedString += "WHILE COND_BEGIN";
+                    //this->lexedString += "WHILE COND_BEGIN";
+                    tempVecTok.push_back("WHILE");
+                    tempVecTokInfo.push_back("~~~");
+                    tempVecTok.push_back("COND_BEGIN");
+                    tempVecTokInfo.push_back("~~~");
                     is_args = true;
                     is_condition = true;
                     ++str_num;
@@ -340,7 +393,9 @@ Lexer::Lexer(std::string sourceCode)
                 if (str_num < splitted.size()-2 and (splitted[str_num+1] == "." and isNumber(splitted[str_num+2])))
                 {
                     // VALUE@exp_string + "." + splitted[str_num+2]
-                    this->lexedString += "VALUE@" + exp_string + "." + splitted[str_num+2];
+                    //this->lexedString += "VALUE@" + exp_string + "." + splitted[str_num+2];
+                    tempVecTok.push_back("VALUE");
+                    tempVecTokInfo.push_back(exp_string + "." + splitted[string_num+2]);
                     str_num += 2;
                     continue;
                 }
@@ -357,7 +412,9 @@ Lexer::Lexer(std::string sourceCode)
                 else
                 {
                     // VALUE@exp_string
-                    this->lexedString += "VALUE@" + exp_string;
+                    //this->lexedString += "VALUE@" + exp_string;
+                    tempVecTok.push_back("VALUE");
+                    tempVecTokInfo.push_back(exp_string);
                     continue;
                 }
             }
@@ -368,7 +425,9 @@ Lexer::Lexer(std::string sourceCode)
                 if (temp_expression.var_type == "" and not (is_args and is_function_definition))
                 {
                     // VAR_TYPE@exp_string
-                    this->lexedString += "VAR_TYPE@" + exp_string;
+                    //this->lexedString += "VAR_TYPE@" + exp_string;
+                    tempVecTok.push_back("VAR_TYPE");
+                    tempVecTokInfo.push_back(exp_string);
                     temp_expression.var_type = exp_string;
                     continue;
                 }
@@ -381,7 +440,9 @@ Lexer::Lexer(std::string sourceCode)
                 else if (is_args or is_function_definition)
                 {
                     // VAR_TYPE@exp_string
-                    this->lexedString += "VAR_TYPE@" + exp_string;
+                    //this->lexedString += "VAR_TYPE@" + exp_string;
+                    tempVecTok.push_back("VAR_TYPE");
+                    tempVecTokInfo.push_back(exp_string);
                     continue;
                 }
                 else
@@ -395,9 +456,10 @@ Lexer::Lexer(std::string sourceCode)
             if (isNormString(exp_string) == 1 and ((str_num < splitted.size()-1 and splitted[str_num+1] != "(") or
                 str_num == splitted.size()-1))
             {
-
                 // VAR_NAME@exp_string
-                this->lexedString += "VAR_NAME@" + exp_string;
+                //this->lexedString += "VAR_NAME@" + exp_string;
+                tempVecTok.push_back("VAR_NAME");
+                tempVecTokInfo.push_back(exp_string);
                 temp_expression.var_name = exp_string;
                 continue;
             }
@@ -423,7 +485,11 @@ Lexer::Lexer(std::string sourceCode)
                 if (str_num > 0 and findB(std::begin(var_types), std::end(var_types), splitted[str_num-1]))
                 {
                     // Function definition
-                    this->lexedString += "FN_DEF@" + exp_string + " ARGS_BEGIN";
+                    //this->lexedString += "FN_DEF@" + exp_string + " ARGS_BEGIN";
+                    tempVecTok.push_back("FN_DEF");
+                    tempVecTokInfo.push_back(exp_string);
+                    tempVecTok.push_back("ARGS_BEGIN");
+                    tempVecTokInfo.push_back("~~~");
                     is_args = true;
                     is_function_definition = true;
                     continue;
@@ -431,7 +497,11 @@ Lexer::Lexer(std::string sourceCode)
                 else
                 {
                     // Function call
-                    this->lexedString += "FN_CALL@" + exp_string + " ARGS_BEGIN";
+                    //this->lexedString += "FN_CALL@" + exp_string + " ARGS_BEGIN";
+                    tempVecTok.push_back("FN_CALL");
+                    tempVecTokInfo.push_back(exp_string);
+                    tempVecTok.push_back("ARGS_BEGIN");
+                    tempVecTokInfo.push_back("~~~");
                     is_args = true;
                     is_function_call = true;
                     continue;
@@ -445,18 +515,30 @@ Lexer::Lexer(std::string sourceCode)
         }
         lexedSourceCode.push_back(temp_expression);
     
-        if (&splitted != &separated_sourceCodeString[separated_sourceCodeString.size()-1])
-            this->lexedString += "\n";
+        /*if (&splitted != &separated_sourceCodeString[separated_sourceCodeString.size()-1])
+            this->lexedString += "\n";*/
+
+        TokenizedSource.push_back(tempVecTok);
+        TokensInfo.push_back(tempVecTokInfo);
     }
 
     //std::cout << this->lexedString << std::endl;
 
 }
+std::vector<std::vector<std::string>> Lexer::getTokenizedSource()
+{
+    return TokenizedSource;
+}
 
-std::string Lexer::getLexedString()
+std::vector<std::vector<std::string>> Lexer::getTokensInfo()
+{
+    return TokensInfo;
+}
+
+/*std::string Lexer::getLexedString()
 {
     return this->lexedString;
-}
+}*/
 
 
 // Проверяет наличие элемента в массиве
