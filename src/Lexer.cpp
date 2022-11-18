@@ -187,9 +187,9 @@ Lexer::Lexer(std::string sourceCode)
 
             if (exp_string == "=")
             {
-                // ASSIGN
-                //this->lexedString += "ASSIGN";
-                tempVecTok.push_back("ASSIGN");
+                // SET
+                //this->lexedString += "SET";
+                tempVecTok.push_back("SET");
                 tempVecTokInfo.push_back("~~~");
                 second_exp_part = true;
                 continue;
@@ -522,6 +522,16 @@ Lexer::Lexer(std::string sourceCode)
         TokensInfo.push_back(tempVecTokInfo);
     }
 
+    for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
+    {
+        for (uint64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
+        {
+            std::cout << TokenizedSource[n1][n2] << " ";
+            if (TokensInfo[n1][n2] != "~~~")
+                std::cout << TokensInfo[n1][n2] << " ";
+        }
+        std::cout << "\n";
+    }
     //std::cout << this->lexedString << std::endl;
 
 }
