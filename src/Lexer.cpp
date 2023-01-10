@@ -61,7 +61,15 @@ Lexer::Lexer(std::string sourceCode)
             if (not ((ascii_num > 47 and ascii_num < 58) or (ascii_num > 64 and ascii_num < 91) or
                      (ascii_num > 96 and ascii_num < 123)) and ascii_num != ' ')
             {
-                temp_str.append(" ").push_back(ascii_num);
+                temp_str.append(" ");
+                if (((ascii_num > 60 and ascii_num < 63) or ascii_num == '!') and char_num+1 < sepr_str.length() and sepr_str[char_num+1] == '=')
+                {
+                    ++char_num;
+                    temp_str += sepr_str[char_num-1];
+                    temp_str += sepr_str[char_num];
+                }
+                else
+                    temp_str.push_back(ascii_num);
                 temp_str.append(" ");
             }
             else
@@ -128,9 +136,12 @@ Lexer::Lexer(std::string sourceCode)
             std::string exp_string = splitted[str_num];
             /*if (str_num > 0 and str_num < splitted.size())
                 lexedString += " ";*/
-
             if (exp_string == "(")
             {
+                if (not is_condition and not is_args and not is_function_call and not is_function_definition) {
+                    tempVecTok.push_back("RBRAC_BEGIN");
+                    tempVecTokInfo.push_back("~~~");
+                }
                 continue;
             }
             if (exp_string == ")")
@@ -146,8 +157,7 @@ Lexer::Lexer(std::string sourceCode)
                     is_args = false;
                     continue;
                 }
-
-                if ((str_num < splitted.size()-1 and splitted[str_num+1] == "{" and is_function_definition))
+                else if ((str_num < splitted.size()-1 and splitted[str_num+1] == "{" and is_function_definition))
                 {
                     //this->lexedString += "ARGS_END";
                     tempVecTok.push_back("ARGS_END");
@@ -156,14 +166,20 @@ Lexer::Lexer(std::string sourceCode)
                     is_args = false;
                     continue;
                 }
-
-                if (is_function_call)
+                else if (is_function_call)
                 {
                     //this->lexedString += "ARGS_END";
                     tempVecTok.push_back("ARGS_END");
                     tempVecTokInfo.push_back("~~~");
                     is_function_call = false;
                     is_args = false;
+                    continue;
+                }
+                else
+                {
+                    //this->lexedString += "ARGS_END";
+                    tempVecTok.push_back("RBRAC_END");
+                    tempVecTokInfo.push_back("~~~");
                     continue;
                 }
             }
@@ -187,9 +203,9 @@ Lexer::Lexer(std::string sourceCode)
 
             if (exp_string == "=")
             {
-                // SET
-                //this->lexedString += "SET";
-                tempVecTok.push_back("SET");
+                // ASSIGN
+                //this->lexedString += "ASSIGN";
+                tempVecTok.push_back("ASSIGN");
                 tempVecTokInfo.push_back("~~~");
                 second_exp_part = true;
                 continue;
@@ -507,7 +523,9 @@ Lexer::Lexer(std::string sourceCode)
                     continue;
                 }
             }
-            
+
+            if (exp_string == "(")
+                exit(15);
 
 
             std::cout << "Lexer Error: Unknown token - \"" << exp_string << "\"" << std::endl;
