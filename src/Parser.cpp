@@ -13,6 +13,7 @@ struct Node
 
 unsigned int findToken(std::vector<std::string> &vec, std::string str);
 static void recursionNodePrint (Node *node, uint32_t &n_c);
+Node* recursionMathParser(std::vector<std::string> expression);
 
 
 Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
@@ -114,6 +115,10 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
     }
     uint32_t kind_counter = 0;
     recursionNodePrint(&Program, kind_counter);
+    std::cout << "\n\n\n\n";
+    Node* a = recursionMathParser(std::vector<std::string> {"1", "+", "2", "*", "3", "/", "(", "1", "+", "1", ")"});
+    kind_counter = 0;
+    recursionNodePrint(a, kind_counter);
 }
 
 /*void Parser::parseExp(std::vector<std::string> &VecLine, std::vector<std::string> &VecLineInfo) {
@@ -219,6 +224,40 @@ static int findTokenInVector(std::vector<std::string> &vec, std::string element)
             return num;
     }
     return -1;
+}
+
+Node* recursionMathParser(std::vector<std::string> expression)
+{
+    Node result;
+    for (std::string math_token : {"+", "-", "*", "/"})
+    {
+        u_int32_t rbrac_count = 0;
+        for (u_int32_t token_num=0; token_num < expression.size(); ++token_num) {
+            if (expression[token_num] == math_token and rbrac_count == 0) {
+                result.Type = "OP";
+                result.kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin(), expression.begin()+token_num)));
+                result.kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+token_num+1, expression.end())));
+                return &result;
+            }
+            if (expression[token_num] == "(")
+                ++rbrac_count;
+            if (expression[token_num] == ")")
+                --rbrac_count;
+
+            if (expression.size() > 0 and expression[0] == "(" and expression[expression.size()-1] == ")") {
+                //result.Type = "OP";
+                result.kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+1, expression.end()-1)));
+                return &result;
+            }
+            if (expression[token_num] == "") {
+
+            }
+        }
+    }
+
+    result.Type = "aoe";
+    result.Info = expression[0];
+    return &result;
 }
 
 Node* parseMathExpression(std::vector<std::string> expression)
