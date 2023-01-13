@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
     //std::cout << std::endl << *temp_str << std::endl;
     std::map <std::string, int> number_of_brackets = {{"round_st",  0}, {"round_end",  0}, // Кол-во круглых скобок
                                                       {"figure_st", 0}, {"figure_end", 0}};// Кол-во фигурных скобок
-    bool close_program = false;
     for (char ch : source_code)
     {
         if (ch == '{')
@@ -76,7 +75,7 @@ int main(int argc, char *argv[])
         for (uint32_t num = 0; num < abs(difference); ++num)
             std::cout << "Syntax error: character `" << miss_char << "` not found" << std::endl;
         
-        close_program = true;
+        return -1;
     }
 
     if (number_of_brackets["round_st"] != number_of_brackets["round_end"])
@@ -87,10 +86,8 @@ int main(int argc, char *argv[])
         for (uint32_t num = 0; num < abs(difference); ++num)
             std::cout << "Syntax error: character `" << miss_char << "` not found" << std::endl;
         
-        close_program = true;
+        return -1;
     }
-
-    if (close_program) return -1;
 
     //std::vector 
 

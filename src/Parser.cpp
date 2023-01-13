@@ -111,14 +111,22 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
                 tempN->Mother = MotherNode;
                 MotherNode->kind.push_back(tempN);
             }
+
+            if (Token == "ASSIGN") {
+                std::cout << line_num << std::endl;
+                tempN = new Node;
+                tempN->Type = Token;
+                tempN->Mother = MotherNode;
+                tempN->kind.push_back(recursionMathParser(std::vector<std::string> (VecLine.begin()+token_num+1, VecLine.end())));
+                uint32_t a = 0;
+                recursionNodePrint(tempN->kind[0], a);
+                token_num = VecLine.size();
+            }
+
         }
     }
     uint32_t kind_counter = 0;
-    recursionNodePrint(&Program, kind_counter);
-    std::cout << "\n\n\n\n";
-    Node* a = recursionMathParser(std::vector<std::string> {"1", "+", "2", "*", "3", "/", "(", "1", "+", "1", ")"});
-    kind_counter = 0;
-    recursionNodePrint(a, kind_counter);
+    //recursionNodePrint(&Program, kind_counter);
 }
 
 /*void Parser::parseExp(std::vector<std::string> &VecLine, std::vector<std::string> &VecLineInfo) {
@@ -228,16 +236,26 @@ static int findTokenInVector(std::vector<std::string> &vec, std::string element)
 
 Node* recursionMathParser(std::vector<std::string> expression)
 {
-    Node result;
+    Node *result = new Node;
     for (std::string math_token : {"+", "-", "*", "/"})
     {
         u_int32_t rbrac_count = 0;
         for (u_int32_t token_num=0; token_num < expression.size(); ++token_num) {
+
             if (expression[token_num] == math_token and rbrac_count == 0) {
-                result.Type = "OP";
-                result.kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin(), expression.begin()+token_num)));
-                result.kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+token_num+1, expression.end())));
-                return &result;
+                if (expression[token_num] == "/") {
+                    for (u_int32_t i = expression.size()-1; i > 0; --i) {
+                        if (expression[i] == "/") {
+                            token_num = i;
+                            break;
+                        }
+                    }
+                }
+
+                result->Type = math_token;
+                result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin(), expression.begin()+token_num)));
+                result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+token_num+1, expression.end())));
+                return result;
             }
             if (expression[token_num] == "(")
                 ++rbrac_count;
@@ -245,9 +263,9 @@ Node* recursionMathParser(std::vector<std::string> expression)
                 --rbrac_count;
 
             if (expression.size() > 0 and expression[0] == "(" and expression[expression.size()-1] == ")") {
-                //result.Type = "OP";
-                result.kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+1, expression.end()-1)));
-                return &result;
+                result->Type = "OP";
+                result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+1, expression.end()-1)));
+                return result;
             }
             if (expression[token_num] == "") {
 
@@ -255,44 +273,9 @@ Node* recursionMathParser(std::vector<std::string> expression)
         }
     }
 
-    result.Type = "aoe";
-    result.Info = expression[0];
-    return &result;
-}
-
-Node* parseMathExpression(std::vector<std::string> expression)
-{
-    Node *MotherNode = new Node;
-    Node *TempNode;
-
-    MathOrder *math_order;
-    math_order->Mother = math_order;
-
-    uint32_t start_pose = 0;
-    while (expression.size() != 0) {
-        for (uint32_t tok_num = start_pose; tok_num < expression.size(); ++tok_num) {
-            if (expression[tok_num] == "RBRAC_BEGIN") {
-                start_pose = tok_num + 1;
-                break;
-            }
-        }
-
-
-
-    }
-}
-
-static MathOrder recursionRightMathOrder(std::vector<std::string> &expression)
-{
-    MathOrder result;
-    bool result_is_clear = true;
-    int token_pos = -1;
-    token_pos = findTokenInVector(expression, "RBRAC_BEGIN");
-    if (token_pos != -1) {
-        if (result_is_clear) {
-            //result =
-        }
-    }
+    result->Type = "aoe";
+    result->Info = expression[0];
+    return result;
 }
 
 void parseLogicalExpression()
