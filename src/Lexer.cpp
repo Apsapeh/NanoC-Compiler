@@ -103,11 +103,13 @@ Lexer::Lexer(std::string sourceCode)
         std::vector <std::string> temp_vec;
         for (unsigned long long char_num = 0; char_num < sepr_str.length(); ++char_num)
         {
-            if (sepr_str[char_num] == ' ' or char_num == sepr_str.length() - 1)
+            if (sepr_str[char_num] == ' ' or sepr_str[char_num] == ',' or char_num == sepr_str.length() - 1)
             {
                 if (char_num == sepr_str.length() - 1) temp_str.push_back(sepr_str[char_num]);
-                temp_vec.push_back(temp_str);
-                temp_str.clear();
+                if (temp_str != "") {
+                    temp_vec.push_back(temp_str);
+                    temp_str.clear();
+                }
             }
             else
                 temp_str.push_back(sepr_str[char_num]);
@@ -542,6 +544,7 @@ Lexer::Lexer(std::string sourceCode)
 
     for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
     {
+        std::cout << n1 << " -- ";
         for (uint64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
         {
             std::cout << TokenizedSource[n1][n2] << " ";
