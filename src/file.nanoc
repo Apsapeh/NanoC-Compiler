@@ -1,7 +1,7 @@
 // Без строк
 /*Cumment*/
 
-#define true 1 // Чтобы VSC не ругалось на ошибки
+#define true 1 // Чтобы VSC не ругалась на ошибки
 
 int ass(int num)
 {
@@ -9,7 +9,7 @@ int ass(int num)
 	return(a);
 }
 
-int main(int a, char n)
+int main(int a int n)
 {
 	int num1 = 5 + 3 + (2 - 1);
 	int num2 = num1;

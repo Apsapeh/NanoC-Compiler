@@ -20,7 +20,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
     Node *MotherNode = &Program;
 
     Node *tempN;
-    bool isFunctionCall = false;
+    int isFunctionCall = 0;
     for (uint32_t line_num=0; line_num < TokenizedSource.size(); ++line_num)
     {
         std::vector<std::string> &VecLine = TokenizedSource[line_num];
@@ -58,7 +58,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
                 }
 
                 if (Token == "FN_CALL")
-                    isFunctionCall = true;
+                    ++isFunctionCall;
                 //std::cout << Info << std::endl;
             }
             else if (Token == "ARGS_BEGIN" or Token == "COND_BEGIN")
@@ -72,9 +72,9 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
             else if (Token == "ARGS_END" or Token == "COND_END" or Token == "END") {
                 MotherNode = MotherNode->Mother;
 
-                if (isFunctionCall)
+                if (isFunctionCall != 0)
                 {
-                    isFunctionCall = false;
+                    --isFunctionCall;
                     MotherNode = MotherNode->Mother;
                 }
             }

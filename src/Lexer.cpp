@@ -80,7 +80,7 @@ Lexer::Lexer(std::string sourceCode)
         // Удаляет лишние пробелы
         temp_str = "";
         unsigned int space_count = 0;
-        for(unsigned long long char_num = 0; char_num < sepr_str.length(); ++char_num)
+        for (unsigned long long char_num = 0; char_num < sepr_str.length(); ++char_num)
         {
             sepr_str[char_num]==' ' ? ++space_count : space_count=0;
             if (space_count < 2)
@@ -118,9 +118,22 @@ Lexer::Lexer(std::string sourceCode)
     }
 
 
+    // Простейший препроцессинг
+    for (std::vector <std::string> &splitted : separated_sourceCodeString) {
+        for (uint32_t str_num = 0; str_num < splitted.size(); ++str_num) {
+            if (splitted[str_num] == "true") {
+                splitted[str_num] = "1";
+            }
+            else if (splitted[str_num] == "false") {
+                splitted[str_num] = "0";
+            }
+        }
+    }
+
+
     // Лексинг строк
     bool is_function_definition = false;
-    bool is_function_call = false;
+    int is_function_call = 0;
     bool is_args = false;
     uint64_t string_num = 0;
     for (std::vector <std::string> &splitted : separated_sourceCodeString)
@@ -140,7 +153,7 @@ Lexer::Lexer(std::string sourceCode)
                 lexedString += " ";*/
             if (exp_string == "(")
             {
-                if (not is_condition and not is_args and not is_function_call and not is_function_definition) {
+                if (not is_condition and not is_args and is_function_call == 0 and not is_function_definition) {
                     tempVecTok.push_back("RBRAC_BEGIN");
                     tempVecTokInfo.push_back("~~~");
                 }
@@ -168,12 +181,12 @@ Lexer::Lexer(std::string sourceCode)
                     is_args = false;
                     continue;
                 }
-                else if (is_function_call)
+                else if (is_function_call != 0)
                 {
                     //this->lexedString += "ARGS_END";
                     tempVecTok.push_back("ARGS_END");
                     tempVecTokInfo.push_back("~~~");
-                    is_function_call = false;
+                    --is_function_call;
                     is_args = false;
                     continue;
                 }
@@ -308,7 +321,7 @@ Lexer::Lexer(std::string sourceCode)
                 continue;
             }
 
-            if(exp_string == "true")
+           /* if(exp_string == "true")
             {
                 // TRUE
                 //this->lexedString += "TRUE";
@@ -323,7 +336,7 @@ Lexer::Lexer(std::string sourceCode)
                 tempVecTok.push_back("FALSE");
                 tempVecTokInfo.push_back("~~~");
                 continue;
-            }
+            }*/
 
 
 
@@ -521,7 +534,7 @@ Lexer::Lexer(std::string sourceCode)
                     tempVecTok.push_back("ARGS_BEGIN");
                     tempVecTokInfo.push_back("~~~");
                     is_args = true;
-                    is_function_call = true;
+                    ++is_function_call;
                     continue;
                 }
             }
