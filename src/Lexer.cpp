@@ -110,6 +110,8 @@ Lexer::Lexer(std::string sourceCode)
                     temp_vec.push_back(temp_str);
                     temp_str.clear();
                 }
+                if (sepr_str[char_num] == ',')
+                    temp_vec.push_back("SEPARATOR");
             }
             else
                 temp_str.push_back(sepr_str[char_num]);
@@ -197,6 +199,15 @@ Lexer::Lexer(std::string sourceCode)
                     tempVecTokInfo.push_back("~~~");
                     continue;
                 }
+            }
+
+            if (exp_string == "SEPARATOR")
+            {
+                // SEPARATOR
+                //this->lexedString += "SEPARATOR";
+                tempVecTok.push_back("SEPARATOR");
+                tempVecTokInfo.push_back("~~~");
+                continue;
             }
 
             if (exp_string == "{")
@@ -320,7 +331,12 @@ Lexer::Lexer(std::string sourceCode)
                 tempVecTokInfo.push_back("~~~");
                 continue;
             }
-
+            if (exp_string == "not" or exp_string == "!")
+            {
+                tempVecTok.push_back("LNOT");
+                tempVecTokInfo.push_back("~~~");
+                continue;
+            }
            /* if(exp_string == "true")
             {
                 // TRUE
