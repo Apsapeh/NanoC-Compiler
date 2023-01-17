@@ -7,6 +7,7 @@
 #include "main.h"
 #include "Lexer.h"
 #include "Parser.h"
+#include "VirtualMachine_NC_ASM.h"
 
 int main(int argc, char *argv[])
 {
