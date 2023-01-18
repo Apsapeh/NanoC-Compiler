@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <malloc.h>
 
 #include "../VirtualMachine_NC_ASM.h"
 
@@ -38,5 +39,19 @@ int main(int argc, char *argv[])
 
     delete temp_str;
 
-    std::cout << source_code << std::endl;
+//    VirtualMachine_NC_ASM::ASM_Instruction vasm[1] = {{1, calloc(1, 1), calloc(1, 4)}};
+    VirtualMachine_NC_ASM::ASM_Instruction vasm[]  {{1, malloc(8), malloc(8)},
+                                                    {4, malloc(8)},
+                                                    {3, malloc(8), malloc(8)},
+                                                    {4, malloc(8)},
+                                                    {2, malloc(8)}};
+    *(u_int64_t*)vasm[0].val1 = 0;
+    *(u_int64_t*)vasm[0].val2 = 4;
+    *(u_int64_t*)vasm[1].val1 = 0;
+    *(u_int64_t*)vasm[2].val1 = 0;
+    *(u_int64_t*)vasm[2].val2 = 4;
+    *(u_int64_t*)vasm[3].val1 = 0;
+    *(u_int64_t*)vasm[4].val1 = 0;
+    std::cout << vasm[0].val1 << std::endl << vasm[0].val2 << std::endl;
+    VirtualMachine_NC_ASM VM(vasm, (unsigned long long) 4, (unsigned long long) 1);
 }
