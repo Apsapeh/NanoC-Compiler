@@ -39,10 +39,13 @@ int main(int argc, char *argv[])
             std::string tmp;
             VirtualMachine_NC_ASM::ASM_Instruction tmp_asm;
             int op_num = 0;
+            if (*temp_str == "##")
+                break;
             for (char &a : *temp_str)
             {
                 if (a == ' ' or a == '\n')
                 {
+
                     if (op_num == 0) {
                         tmp_asm.Command = std::stoi(tmp);
                         ++op_num;

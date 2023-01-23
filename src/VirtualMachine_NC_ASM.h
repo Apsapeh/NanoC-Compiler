@@ -1,21 +1,30 @@
 #pragma once
 
 /*
- * 1 - allocate memory (adr) (size)
- * 2 - load from heap to r1 (adr) (r1)
- * 3 - free memory (adr)
+ * 1 - allocate memory                      (adr) (size)
+ * 2 - load from heap to r1                 (adr) (r1)
+ * 3 - free memory                          (adr)
  * 4 - rebase heap
- * 5 - add to dynamic stack (size)
- * 6 - load from dynamic stack (adr) (r1)
- * 7 - del from dynamic stack (size)
- * 8 - copy from r1 to r2 (r1) (r2)
- * 9 - assign by link r1 to r2 (r1) (r2)
- * 10 - set value to reg (value) (r1)
- * 11 - add r2 to r1 (r2) (r1)
- * 12 - subdivide r2 from r1 (r2) (r1)
- * 13 - multiple r1 by r2 (r2) (r1)
- * 14 - divide r1 by r2 (r2) (r1)
  *
+ * 5 - add to dynamic stack                 (size)
+ * 6 - load from dynamic stack              (adr) (r1)
+ * 7 - del from dynamic stack               (size)
+ *
+ * 8 - copy from r1 to r2                   (r1) (r2)
+ * 9 - assign by link r1 to r2              (r1) (r2)
+ * 10 - set value to reg                    (value) (r1)
+ *
+ * 11 - add r2 to r1                        (r2) (r1)
+ * 12 - subdivide r2 from r1                (r2) (r1)
+ * 13 - multiple r1 by r2                   (r2) (r1)
+ * 14 - divide r1 by r2                     (r2) (r1)
+ *
+ * 15 - jump on val bytes if r1 = 1         (val) (r1)
+ * 16 - jump on val bytes if r1 = 0         (vol) (r1)
+ * 17 - jump on val bytes if r1 < 0         (val) (r1)
+ * 18 - jump on val bytes if r1 > 0         (val) (r1)
+ * 19 - jump on val bytes if not (r1 < 0)   (val) (r1)
+ * 20 - jump on val bytes if not (r1 > 0)   (val) (r1)
  *
  * 50 - print r1
 */

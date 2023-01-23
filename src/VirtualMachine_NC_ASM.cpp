@@ -13,7 +13,7 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
     std::map <u_int64_t, u_int64_t> heap_vars_bind;
 
 
-    void* registers[3] {nullptr, nullptr, nullptr};
+    void* registers[4] {nullptr, nullptr, nullptr, nullptr};
 
     u_int64_t dyn_stack_size = 0;
     u_int64_t dyn_stack_relative_start = 0;
@@ -70,6 +70,7 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
         }
         else if (inst->Command == 9) {
             // TODO: ADD
+            registers[*(u_int64_t*)inst->val2] = registers[*(u_int64_t*)inst->val1];
         }
         else if (inst->Command == 10) {
             registers[*(u_int64_t*)inst->val2] = inst->val1;
