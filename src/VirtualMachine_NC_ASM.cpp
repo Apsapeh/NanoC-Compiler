@@ -1,7 +1,6 @@
 //#include <malloc.h>
 #include <iostream>
 #include <map>
-#include <stdlib.h>
 #include "VirtualMachine_NC_ASM.h"
 
 
@@ -27,109 +26,115 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
 
         // TODO: ДОДЕЛАТЬ КУЧУ
         // Heap
-        if (inst->Command == 1) {
-            ++heap_size;
-            heap = (void **)realloc(heap, sizeof(void*) * heap_size);
-            heap[*(u_int64_t *)inst->val1] = malloc(*(u_int64_t*)inst->val2);
-        }
-        else if (inst->Command == 3) {
-            free(heap[*(u_int64_t *)inst->val1]);
-            heap[*(u_int64_t *)inst->val1] = nullptr;
-            u_int64_t index = binarySearchinHeapNull(heap_null_chunks_arr, heap_null_arr_size, *(u_int64_t *)inst->val1 / heap_null_chunk_size);
-            ++heap_null_arr_size;
-            if (!index) {
-                heap_null_chunks_arr =  (heapNullChunk*) realloc(heap_null_chunks_arr, sizeof(heapNullChunk)*heap_null_arr_size);
-                index = heap_null_arr_size - 1;
-                heap_null_chunks_arr[index].pos = *(u_int64_t *)inst->val1;
+        switch (inst->Command) {
+            case 1:
+                ++heap_size;
+                heap = (void **)realloc(heap, sizeof(void*) * heap_size);
+                heap[*(u_int64_t *)inst->val1] = malloc(*(u_int64_t*)inst->val2);
+                break;
+            case 2:
+                break;
+            case 3: {
+                free(heap[*(u_int64_t *) inst->val1]);
+                heap[*(u_int64_t *) inst->val1] = nullptr;
+                u_int64_t index = binarySearchinHeapNull(heap_null_chunks_arr, heap_null_arr_size,
+                                                         *(u_int64_t *) inst->val1 / heap_null_chunk_size);
+                ++heap_null_arr_size;
+                if (!index) {
+                    heap_null_chunks_arr = (heapNullChunk *) realloc(heap_null_chunks_arr,
+                                                                     sizeof(heapNullChunk) * heap_null_arr_size);
+                    index = heap_null_arr_size - 1;
+                    heap_null_chunks_arr[index].pos = *(u_int64_t *) inst->val1;
+                }
+                ++heap_null_chunks_arr[index].count;
             }
-            ++heap_null_chunks_arr[index].count;
-            //++heap_null_chunks_arr->count;
-        }
-        else if (inst->Command == 4) {
-            //TODO: ADD
-        }
+                break;
+            case 4:
+                break;
 
-            // Stack
-        else if (inst->Command == 5) {
-            ++dyn_stack_size;
-            dyn_stack = (void**)realloc(dyn_stack, sizeof(void*) * dyn_stack_size);
-            dyn_stack[dyn_stack_size-1] = malloc(*(u_int64_t*)inst->val1);
-        }
-        else if (inst->Command == 6) {
-            registers[*(u_int64_t*)inst->val2] = dyn_stack[dyn_stack_relative_start + *(u_int64_t*)inst->val1];
-        }
-        else if (inst->Command == 7) {
-            int old_size = dyn_stack_size;
-            dyn_stack_size -= *(u_int64_t *)inst->val1 * sizeof(void*);
-            for (u_int64_t index=dyn_stack_size; index < old_size; ++index)
-                free(dyn_stack[index]);
-            dyn_stack = (void**)realloc(dyn_stack, sizeof(void**) * dyn_stack_size);
-        }
-        else if (inst->Command == 8) {
-            // TODO: ADD
-        }
-        else if (inst->Command == 9) {
-            registers[*(u_int64_t*)inst->val2] = registers[*(u_int64_t*)inst->val1];
-        }
-        else if (inst->Command == 10) {
-            registers[*(u_int64_t*)inst->val2] = inst->val1;
-        }
-        else if (inst->Command == 11) {
-            *(u_int64_t*)registers[*(u_int64_t*)inst->val2] += *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
-        }
-        else if (inst->Command == 12) {
-            *(u_int64_t*)registers[*(u_int64_t*)inst->val2] -= *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
-        }
-        else if (inst->Command == 13) {
-            *(u_int64_t*)registers[*(u_int64_t*)inst->val2] *= *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
-        }
-        else if (inst->Command == 14) {
-            *(u_int64_t*)registers[*(u_int64_t*)inst->val2] /= *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
-        }
+            case 5:
+                ++dyn_stack_size;
+                dyn_stack = (void**)realloc(dyn_stack, sizeof(void*) * dyn_stack_size);
+                dyn_stack[dyn_stack_size-1] = malloc(*(u_int64_t*)inst->val1);
+                break;
+            case 6:
+                registers[*(u_int64_t*)inst->val2] = dyn_stack[dyn_stack_relative_start + *(u_int64_t*)inst->val1];
+                break;
+            case 7: {
+                u_int64_t old_size = dyn_stack_size;
+                dyn_stack_size -= *(u_int64_t *) inst->val1 * sizeof(void *);
+                for (u_int64_t index = dyn_stack_size; index < old_size; ++index)
+                    free(dyn_stack[index]);
+                dyn_stack = (void **) realloc(dyn_stack, sizeof(void **) * dyn_stack_size);
+            }
+                break;
 
-        else if (inst->Command == 15) {
-            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 1)
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 16) {
-            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 0)
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 17) {
-            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] < 0)
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 18) {
-            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] > 0)
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 19) {
-            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 1))
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 20) {
-            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 0))
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 21) {
-            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] < 0))
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 22) {
-            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] > 0))
-                num_of_instr += *(u_int64_t*)inst->val1;
-        }
-        else if (inst->Command == 23) {
-            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val1] != 0)
-                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 1;
-            else
-                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 1;
-        }
+            case 8:
+                break;
+            case 9:
+                registers[*(u_int64_t*)inst->val2] = registers[*(u_int64_t*)inst->val1];
+                break;
+            case 10:
+                registers[*(u_int64_t*)inst->val2] = inst->val1;
+                break;
 
+            case 11:
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] += *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
+                break;
+            case 12:
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] -= *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
+                break;
+            case 13:
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] *= *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
+                break;
+            case 14:
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] /= *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
+                break;
 
+            case 15:
+                if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 1)
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
+            case 16:
+                if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 0)
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
+            case 17:
+                if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] < 0)
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
+            case 18:
+                if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] > 0)
+                    num_of_instr += *(u_int64_t *) inst->val1;
+                break;
+            case 19:
+                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val2] != 1)
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
+            case 20:
+                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val2] != 0)
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
+            case 21:
+                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val2] >= 0)
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
+            case 22:
+                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val2] <= 0)
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
 
-        else if (inst->Command == 50) {
-            std::cout << *(u_int64_t*)registers[*(u_int64_t*)inst->val1] << std::endl;
+            case 23:
+                if (*(u_int64_t*)registers[*(u_int64_t*)inst->val1] != 0)
+                    *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 1;
+                else
+                    *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 0;
+                break;
+
+            case 50:
+                std::cout << *(u_int64_t*)registers[*(u_int64_t*)inst->val1] << std::endl;
+                break;
+
         }
     }
 }
