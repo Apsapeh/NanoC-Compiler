@@ -9,11 +9,14 @@
 #include <vector>
 #include <string>
 #include <chrono>
+//#include <ios>
 
-#include "../VirtualMachine_NC_ASM.h"
+#include "../VirtualMachine_NC_BYTE-CODE.h"
 
 int main(int argc, char *argv[])
 {
+    std::ios_base::sync_with_stdio(false);
+
     std::string file_name = "";
     if (argc > 1)
     {
@@ -28,7 +31,7 @@ int main(int argc, char *argv[])
     std::string source_code = "";
     std::string formated_source_code = "";
 
-    std::vector<VirtualMachine_NC_ASM::ASM_Instruction> code;
+    std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> code;
 
     std::string *temp_str = new std::string("");
     std::ifstream in(file_name);
@@ -36,7 +39,7 @@ int main(int argc, char *argv[])
     {
         while(getline(in, *temp_str)) {
             std::string tmp;
-            VirtualMachine_NC_ASM::ASM_Instruction tmp_asm;
+            VirtualMachine_NC_BYTE::ASM_Instruction tmp_asm;
             int op_num = 0;
             if (*temp_str == "##")
                 break;
@@ -46,15 +49,15 @@ int main(int argc, char *argv[])
                 {
 
                     if (op_num == 0) {
-                        tmp_asm.Command = std::stoi(tmp);
+                        tmp_asm.Command = std::stoll(tmp);
                         ++op_num;
                     }
                     else if (op_num == 1) {
-                        tmp_asm.val1 = new int64_t(std::stoi(tmp));
+                        tmp_asm.val1 = new int64_t(std::stoll(tmp));
                         ++op_num;
                     }
                     else if (op_num == 2) {
-                        tmp_asm.val2 = new int64_t(std::stoi(tmp));
+                        tmp_asm.val2 = new int64_t(std::stoll(tmp));
                         ++op_num;
                     }
 
@@ -83,10 +86,10 @@ int main(int argc, char *argv[])
     in.close();
     delete temp_str;
 
-    FILE *f = fopen("byte", "w");
+    FILE *f = fopen("byte", "wb");
     //for (int a = 0; a < 1; ++a)
 
-    for (VirtualMachine_NC_ASM::ASM_Instruction i : code) {
+    for (VirtualMachine_NC_BYTE::ASM_Instruction i : code) {
         unsigned char sep = 0;
         fwrite(&i.Command, 1, 1, f);
 
@@ -118,11 +121,11 @@ int main(int argc, char *argv[])
     fclose(f);
 
 
-    VirtualMachine_NC_ASM::ASM_Instruction vasm2[code.size()];
+    VirtualMachine_NC_BYTE::ASM_Instruction vasm2[code.size()];
     std::copy( code.begin(), code.end(), vasm2 );
 
     auto start_time = std::chrono::steady_clock::now();
-    VirtualMachine_NC_ASM VM(vasm2, sizeof(vasm2)/ sizeof(VirtualMachine_NC_ASM::ASM_Instruction), (unsigned long long) 1, 64);
+    VirtualMachine_NC_BYTE VM(vasm2, sizeof(vasm2)/ sizeof(VirtualMachine_NC_BYTE::ASM_Instruction), (unsigned long long) 1, 64);
     auto end_time = std::chrono::steady_clock::now();
     auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
     std::cout << elapsed_ns.count() << " ns\n";

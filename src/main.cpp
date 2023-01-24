@@ -7,10 +7,11 @@
 #include "main.h"
 #include "Lexer.h"
 #include "Parser.h"
-#include "VirtualMachine_NC_ASM.h"
+#include "VirtualMachine_NC_BYTE-CODE.h"
 
 int main(int argc, char *argv[])
 {
+    std::ios_base::sync_with_stdio(false);
     std::string file_name = "";
     if (argc > 1)
     {

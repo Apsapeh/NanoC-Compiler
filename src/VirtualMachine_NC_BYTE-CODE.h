@@ -29,6 +29,9 @@
  * 22 - jump on val bytes if not (r1 > 0)   (val) (r1)
  *
  * 23 - convert val to logical 1 or 0       (val) (r1)
+ * 24 - (AND) if r1 + r2 == 2 write 1 to r2 (r1) (r2)
+ * 25 - (OR)  if r2 + r1 != 0 write 1 to r2 (r1) (r2)
+ * 26 - (NOT) !r1 write to r2               (r1) (r2)
  *
  * 50 - print r1
 */
@@ -36,7 +39,7 @@
 //typedef uint64_t u_int64_t;
 //typedef uint16_t u_int16_t;
 
-class VirtualMachine_NC_ASM {
+class VirtualMachine_NC_BYTE {
 public:
     struct ASM_Instruction {
         unsigned char Command;
@@ -47,8 +50,8 @@ public:
         /*char *reg1;
         char *reg2;*/
     };
-    VirtualMachine_NC_ASM(ASM_Instruction* instructions, unsigned long long count_of_instrs,
-                          unsigned long long stack_size, unsigned short heap_chunk);
+    VirtualMachine_NC_BYTE(ASM_Instruction* instructions, unsigned long long count_of_instrs,
+                           unsigned long long stack_size, unsigned short heap_chunk);
 private:
     struct heapNullChunk {
         u_int16_t count = 0;

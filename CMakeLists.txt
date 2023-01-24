@@ -8,4 +8,4 @@ file(GLOB SOURCES
         src/*.cpp
         )
 
-add_executable(NanoC_Compiler ${SOURCES} src/Parser.cpp src/Parser.h src/VirtualMachine_NC_ASM.cpp src/VirtualMachine_NC_ASM.h)
+add_executable(NanoC_Compiler ${SOURCES} src/Parser.cpp src/Parser.h src/VirtualMachine_NC_BYTE-CODE.cpp src/VirtualMachine_NC_BYTE-CODE.h)

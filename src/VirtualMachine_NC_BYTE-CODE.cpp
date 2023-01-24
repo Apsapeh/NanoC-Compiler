@@ -1,10 +1,10 @@
 //#include <malloc.h>
 #include <iostream>
 #include <map>
-#include "VirtualMachine_NC_ASM.h"
+#include "VirtualMachine_NC_BYTE-CODE.h"
 
 
-VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruction* instructions, unsigned long long count_of_instrs, unsigned long long stack_size, unsigned short heap_null_chunk_size)
+VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Instruction* instructions, unsigned long long count_of_instrs, unsigned long long stack_size, unsigned short heap_null_chunk_size)
 {
     void** dyn_stack = (void**)malloc(0);
     void** heap = (void**)malloc(0);
@@ -47,8 +47,8 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
                     heap_null_chunks_arr[index].pos = *(u_int64_t *) inst->val1;
                 }
                 ++heap_null_chunks_arr[index].count;
-            }
                 break;
+            }
             case 4:
                 break;
 
@@ -66,8 +66,8 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
                 for (u_int64_t index = dyn_stack_size; index < old_size; ++index)
                     free(dyn_stack[index]);
                 dyn_stack = (void **) realloc(dyn_stack, sizeof(void **) * dyn_stack_size);
-            }
                 break;
+            }
 
             case 8:
                 break;
@@ -130,7 +130,25 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
                 else
                     *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 0;
                 break;
-
+            case 24: {
+                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val1] and
+                        *(u_int64_t *) registers[*(u_int64_t *) inst->val2])
+                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 1;
+                else
+                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 0;
+                break;
+            }
+            case 25: {
+                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val1] or
+                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2])
+                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 1;
+                else
+                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 0;
+                break;
+            }
+            case 26:
+                *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = !*(u_int64_t *) registers[*(u_int64_t *) inst->val1];
+                break;
             case 50:
                 std::cout << *(u_int64_t*)registers[*(u_int64_t*)inst->val1] << std::endl;
                 break;
@@ -139,7 +157,7 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
     }
 }
 
-inline u_int64_t VirtualMachine_NC_ASM::binarySearchinHeapNull(heapNullChunk *arr, u_int64_t arr_size, u_int64_t chunk_pos) {
+inline u_int64_t VirtualMachine_NC_BYTE::binarySearchinHeapNull(heapNullChunk *arr, u_int64_t arr_size, u_int64_t chunk_pos) {
     /*u_int64_t left = 0;
     u_int64_t right = 5;
     u_int64_t middle = left + (right - left) / 2;
