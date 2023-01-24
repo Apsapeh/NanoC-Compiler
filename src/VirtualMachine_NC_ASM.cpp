@@ -13,7 +13,7 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
     std::map <u_int64_t, u_int64_t> heap_vars_bind;
 
 
-    void* registers[4] {nullptr, nullptr, nullptr, nullptr};
+    void* registers[6] {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
     u_int64_t dyn_stack_size = 0;
     u_int64_t dyn_stack_relative_start = 0;
@@ -69,7 +69,6 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
             // TODO: ADD
         }
         else if (inst->Command == 9) {
-            // TODO: ADD
             registers[*(u_int64_t*)inst->val2] = registers[*(u_int64_t*)inst->val1];
         }
         else if (inst->Command == 10) {
@@ -87,15 +86,46 @@ VirtualMachine_NC_ASM::VirtualMachine_NC_ASM (VirtualMachine_NC_ASM::ASM_Instruc
         else if (inst->Command == 14) {
             *(u_int64_t*)registers[*(u_int64_t*)inst->val2] /= *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
         }
-        else if (inst->Command == 15) {
 
+        else if (inst->Command == 15) {
+            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 1)
+                num_of_instr += *(u_int64_t*)inst->val1;
         }
         else if (inst->Command == 16) {
-
+            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 0)
+                num_of_instr += *(u_int64_t*)inst->val1;
         }
         else if (inst->Command == 17) {
-
+            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] < 0)
+                num_of_instr += *(u_int64_t*)inst->val1;
         }
+        else if (inst->Command == 18) {
+            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] > 0)
+                num_of_instr += *(u_int64_t*)inst->val1;
+        }
+        else if (inst->Command == 19) {
+            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 1))
+                num_of_instr += *(u_int64_t*)inst->val1;
+        }
+        else if (inst->Command == 20) {
+            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] == 0))
+                num_of_instr += *(u_int64_t*)inst->val1;
+        }
+        else if (inst->Command == 21) {
+            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] < 0))
+                num_of_instr += *(u_int64_t*)inst->val1;
+        }
+        else if (inst->Command == 22) {
+            if (not (*(u_int64_t*)registers[*(u_int64_t*)inst->val2] > 0))
+                num_of_instr += *(u_int64_t*)inst->val1;
+        }
+        else if (inst->Command == 23) {
+            if (*(u_int64_t*)registers[*(u_int64_t*)inst->val1] != 0)
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 1;
+            else
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 1;
+        }
+
 
 
         else if (inst->Command == 50) {

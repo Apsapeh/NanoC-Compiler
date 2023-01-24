@@ -23,8 +23,12 @@
  * 16 - jump on val bytes if r1 = 0         (vol) (r1)
  * 17 - jump on val bytes if r1 < 0         (val) (r1)
  * 18 - jump on val bytes if r1 > 0         (val) (r1)
- * 19 - jump on val bytes if not (r1 < 0)   (val) (r1)
- * 20 - jump on val bytes if not (r1 > 0)   (val) (r1)
+ * 19 - jump on val bytes if not (r1 = 1)   (val) (r1)
+ * 20 - jump on val bytes if not (r1 = 0)   (val) (r1)
+ * 21 - jump on val bytes if not (r1 < 0)   (val) (r1)
+ * 22 - jump on val bytes if not (r1 > 0)   (val) (r1)
+ *
+ * 23 - convert val to logical 1 or 0       (val) (r1)
  *
  * 50 - print r1
 */

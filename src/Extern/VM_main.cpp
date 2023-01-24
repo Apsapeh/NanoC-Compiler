@@ -8,7 +8,6 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <stdlib.h>
 #include <chrono>
 
 #include "../VirtualMachine_NC_ASM.h"
@@ -51,11 +50,11 @@ int main(int argc, char *argv[])
                         ++op_num;
                     }
                     else if (op_num == 1) {
-                        tmp_asm.val1 = new u_int64_t(std::stoi(tmp));
+                        tmp_asm.val1 = new int64_t(std::stoi(tmp));
                         ++op_num;
                     }
                     else if (op_num == 2) {
-                        tmp_asm.val2 = new u_int64_t(std::stoi(tmp));
+                        tmp_asm.val2 = new int64_t(std::stoi(tmp));
                         ++op_num;
                     }
 
