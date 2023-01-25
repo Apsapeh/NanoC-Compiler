@@ -70,12 +70,14 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
             }
 
             case 8:
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = *(u_int64_t*)registers[*(u_int64_t*)inst->val1];
                 break;
             case 9:
                 registers[*(u_int64_t*)inst->val2] = registers[*(u_int64_t*)inst->val1];
                 break;
             case 10:
-                registers[*(u_int64_t*)inst->val2] = inst->val1;
+                *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = *(u_int64_t*)inst->val1;
+                free(inst->val1);
                 break;
 
             case 11:

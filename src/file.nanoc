@@ -2,8 +2,9 @@
 /*Cumment*/
 
 #define true 1 // Чтобы VSC не ругалась на ошибки
-
-int ass(int num)
+int a = 3;
+int num = a;
+/*int ass(int num)
 {
 	int a = num;
 	return(a);
@@ -38,5 +39,5 @@ int main(int a int n)
 	}
 
     num4 = 3 + 2 + 0 or 1;
-}
+}*/
 
