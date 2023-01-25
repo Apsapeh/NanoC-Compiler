@@ -7,6 +7,7 @@
 #include "main.h"
 #include "Lexer.h"
 #include "Parser.h"
+#include "Compiler_to_NCASM.h"
 #include "VirtualMachine_NC_BYTE-CODE.h"
 
 int main(int argc, char *argv[])
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
 
     Lexer lexer(source_code);
     Parser parser(lexer.getTokenizedSource(), lexer.getTokensInfo());
+    Compiler_to_NCASM comp_to_ncasm(parser.getParsedProgram());
 
 
     // // Перебираем и ищем переменные, вызовы фунция, арифметические выражения и т.д

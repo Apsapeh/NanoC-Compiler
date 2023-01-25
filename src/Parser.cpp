@@ -1,12 +1,5 @@
 #include "Parser.h"
-struct Node
-{
-    //std::string str = "";
-    std::string Type = "";
-    std::string Info = "";
-    std::vector<Node*> kind;
-    Node *Mother = nullptr;
-};
+typedef Parser::Node Node;
 
 unsigned int findToken(std::vector<std::string> &vec, std::string str);
 static void recursionNodePrint (Node *node, uint32_t &n_c);
@@ -17,8 +10,8 @@ Node* recursionFuncParser(std::vector<std::string> expression, std::vector<std::
 Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
                std::vector<std::vector<std::string>> TokensInfo)
 {
-    Node Program; Program.Type = "Program"; Program.Mother = &Program;
-    Node *MotherNode = &Program;
+    Node* Program = new Node; Program->Type = "Program"; Program->Mother = Program;
+    Node *MotherNode = Program;
 
     Node *tempN;
     for (uint32_t line_num=0; line_num < TokenizedSource.size(); ++line_num)
@@ -206,8 +199,13 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
 
         }
     }
-    uint32_t kind_counter = 0;
-    recursionNodePrint(&Program, kind_counter);
+    ParsedProgram = Program;
+    //uint32_t kind_counter = 0;
+    //recursionNodePrint(&Program, kind_counter);
+}
+
+Node *Parser::getParsedProgram() {
+    return ParsedProgram;
 }
 
 struct MathOrder {
