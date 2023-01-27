@@ -23,5 +23,5 @@ private:
     std::vector<NCASM_Instruction> CompiledCode;
     void recursionNodeParse(Parser::Node *node, uint64_t &k_c,
                                    nodeType type_of_parrent, NCASM_Instruction *temp_instr = nullptr);
-    void recursionMathExpCompiler(Parser::Node *node);
+    void recursionMathExpCompiler(Parser::Node *node, int64_t num);
 };

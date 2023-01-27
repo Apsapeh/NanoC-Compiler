@@ -12,7 +12,8 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
     std::map <u_int64_t, u_int64_t> heap_vars_bind;
 
 
-    void* registers[6] {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    void* registers[6] {malloc(8), malloc(8), malloc(8),
+                        malloc(8), malloc(8), malloc(8)};
 
     u_int64_t dyn_stack_size = 0;
     u_int64_t dyn_stack_relative_start = 0;
@@ -77,7 +78,7 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
                 break;
             case 10:
                 *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = *(u_int64_t*)inst->val1;
-                free(inst->val1);
+                //free(inst->val1);
                 break;
 
             case 11:

@@ -66,10 +66,20 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
             delete temp_instr;
         }
         else {
-            // recursionMathExpCompiler
-        }
+            recursionMathExpCompiler(node->kind[1], -1);
 
+            temp_instr = new NCASM_Instruction;
+            temp_instr->OPcode = "COPY";
+            temp_instr->Args.push_back("math_r0");
+            temp_instr->Args.push_back("tmp_r0");
+            CompiledCode.push_back(*temp_instr);
+            delete temp_instr;
+        }
             return;
+    }
+    else if (node->Type == "IF")
+    {
+        std::cout << "GAY" << std::endl;
     }
 
     /*switch (type_of_parrent) {
@@ -125,21 +135,84 @@ add r1 r0
 mov r0 r3
 */
 
-void Compiler_to_NCASM::recursionMathExpCompiler(Parser::Node *node)
+void Compiler_to_NCASM::recursionMathExpCompiler(Parser::Node *node, int64_t num)
 {
-    if (node->Type == "")
-
+    std::cout << node->Type << std::endl;
+    std::string val1 = "";
+    std::string val2 = "";
+    int64_t arg_num = 0;
     for (Parser::Node *kind : node->kind)
     {
-        if (kind != nullptr)
-            recursionMathExpCompiler(kind);
+        if (kind != nullptr) {
+            if (kind->Type == "VALUE") {
+                if (arg_num == 0)
+                    val1 = kind->Info;
+                else if (arg_num == 1)
+                    val2 = kind->Info;
+            }
+            else
+                recursionMathExpCompiler(kind, arg_num);
+        }
+
+        ++arg_num;
+    }
+
+    std::cout << val1 << " | " << val2 << std::endl;
+    if (!val1.empty()) {
+        NCASM_Instruction* temp_instr = new NCASM_Instruction;
+        temp_instr->OPcode = "SET";
+        temp_instr->Args.push_back(val1);
+        temp_instr->Args.push_back("math_r0");
+        CompiledCode.push_back(*temp_instr);
+        delete temp_instr;
+    }
+    else {
+        NCASM_Instruction* temp_instr = new NCASM_Instruction;
+        temp_instr->OPcode = "MOV";
+        temp_instr->Args.push_back("math_r2");
+        temp_instr->Args.push_back("math_r0");
+        CompiledCode.push_back(*temp_instr);
+        delete temp_instr;
     }
 
 
+    if (!val2.empty()) {
+        NCASM_Instruction* temp_instr = new NCASM_Instruction;
+        temp_instr->OPcode = "SET";
+        temp_instr->Args.push_back(val2);
+        temp_instr->Args.push_back("math_r1");
+        CompiledCode.push_back(*temp_instr);
+        delete temp_instr;
+    }
+    else {
+        NCASM_Instruction* temp_instr = new NCASM_Instruction;
+        temp_instr->OPcode = "MOV";
+        temp_instr->Args.push_back("math_r3");
+        temp_instr->Args.push_back("math_r1");
+        CompiledCode.push_back(*temp_instr);
+        delete temp_instr;
+    }
+
     NCASM_Instruction* temp_instr = new NCASM_Instruction;
-    temp_instr->OPcode = "LOAD";
-    temp_instr->Args.push_back(node->kind[1]->Info);
-    temp_instr->Args.push_back("tmp_r1");
+    temp_instr->OPcode = node->Type;
+    temp_instr->Args.push_back("math_r1");
+    temp_instr->Args.push_back("math_r0");
+    CompiledCode.push_back(*temp_instr);
+    delete temp_instr;
+
+    std::string mov_to_reg = "";
+    if (num == 0)
+        mov_to_reg = "math_r2";
+    else if (num == 1)
+        mov_to_reg = "math_r3";
+    else if (num == -1)
+        return;
+
+
+    temp_instr = new NCASM_Instruction;
+    temp_instr->OPcode = "MOV";
+    temp_instr->Args.push_back("math_r0");
+    temp_instr->Args.push_back(mov_to_reg);
     CompiledCode.push_back(*temp_instr);
     delete temp_instr;
 }

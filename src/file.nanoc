@@ -2,8 +2,12 @@
 /*Cumment*/
 
 #define true 1 // Чтобы VSC не ругалась на ошибки
-int a = 3;
-int num = a;
+//int a = 3;
+//int num = a;
+int num = (1 + 2);
+if (1 + 2 == 1) {
+    num = 6;
+}
 /*int ass(int num)
 {
 	int a = num;

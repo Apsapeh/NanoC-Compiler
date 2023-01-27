@@ -299,6 +299,7 @@ Node* recursionFuncParser(std::vector<std::string> expression, std::vector<std::
 // Алгоритм парсинга мат. выражений был придумал и написан Евгением Вениковым на Python, я его переписал на C++ и доработал
 Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::string> expression_info, Node *mother_node, std::string lmore, u_int32_t lmore_index)
 {
+
     Node *result = new Node;
     const std::string tokens[] = {"ADD", "MINUS", "MULTIPLE", "DIVIDE", "LLESS", "LMORE", "LEQUAL",
                                   "LLESS_EQ", "LMORE_EQ", "LNOT_EQ", "LAND", "LOR", "LNOT"};
