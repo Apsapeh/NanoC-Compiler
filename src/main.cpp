@@ -95,6 +95,12 @@ int main(int argc, char *argv[])
     Compiler_to_NCASM comp_to_ncasm(parser.getParsedProgram());
     Compiler_NCASM_to_ByteCode comp_ncasm_to_byte(comp_to_ncasm.getCompiledCode());
 
+    std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> vasm = comp_ncasm_to_byte.getCompiledCode();
+    VirtualMachine_NC_BYTE::ASM_Instruction vasm2[vasm.size()];
+    std::copy( vasm.begin(), vasm.end(), vasm2 );
+
+    VirtualMachine_NC_BYTE VM(vasm2, sizeof(vasm2)/ sizeof(VirtualMachine_NC_BYTE::ASM_Instruction), (unsigned long long) 1, 64);
+
     delete temp_str;
 }
 

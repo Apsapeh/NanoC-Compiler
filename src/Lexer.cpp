@@ -429,7 +429,7 @@ Lexer::Lexer(std::string sourceCode)
             //     if ((str_num > 0 and isNumber(splitted[str_num-1])) and 
             //         (str_num < splitted.size()-1 and isNumber(splitted[str_num+1])))
             //     {
-                    
+
 
             //     }
             // }
@@ -480,7 +480,7 @@ Lexer::Lexer(std::string sourceCode)
                 }
                 else if (temp_expression.var_type != "" and not (is_args or is_function_definition))
                 {
-                    
+
                     std::cout << "Error: Multiple definition of variable type [" << string_num << "]" << std::endl;
                     exit(-1);
                 }
@@ -513,7 +513,7 @@ Lexer::Lexer(std::string sourceCode)
             else if (isNormString(exp_string) != 1)
             {
                 int8_t code = isNormString(exp_string);
-                
+
                 if (code == -1)
                 {
                     std::cout << "Error: variable name starated from number" << std::endl;
@@ -571,7 +571,7 @@ Lexer::Lexer(std::string sourceCode)
         TokensInfo.push_back(tempVecTokInfo);
     }
 
-    for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
+    /*for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
     {
         std::cout << n1 << " -- ";
         for (uint64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
@@ -581,7 +581,7 @@ Lexer::Lexer(std::string sourceCode)
                 std::cout << TokensInfo[n1][n2] << " ";
         }
         std::cout << "\n";
-    }
+    }*/
     //std::cout << this->lexedString << std::endl;
 
 }

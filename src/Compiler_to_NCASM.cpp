@@ -1,4 +1,5 @@
 #include "Compiler_to_NCASM.h"
+#include <algorithm>
 
 Compiler_to_NCASM::Compiler_to_NCASM(Parser::Node* node)
 {
@@ -45,7 +46,7 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
 
             addInstrToCompiledCode("COPY", "math_r0", "tmp_r0");
         }
-            return;
+        return;
     }
     else if (node->Type == "IF" or node->Type == "WHILE")
     {
@@ -86,11 +87,16 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
 
         old_size = CompiledCode.size();
     }
-    else if (node->Type == "ELSE") {
+    else if (node->Type == "FN_CALL" or node->Info == "print")
+    {
+        if (node->kind[0]->Type == "VALUE") {
+            addInstrToCompiledCode("SET", node->kind[0]->Info, "tmp_r0");
+        }
+        else if (node->kind[0]->Type == "VAR_NAME") {
+            addInstrToCompiledCode("LOAD", node->kind[0]->Info, "tmp_r0");
+        }
 
-    }
-    else if (node->Type == "WHILE") {
-
+        addInstrToCompiledCode("PRINT", "tmp_r0");
     }
 
     ++k_c;
@@ -107,7 +113,7 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
     }
     --k_c;
     if (node->Type == "IF") {
-        auto f = std::find(node->Mother->kind.begin(), node->Mother->kind.end(), node) + 1;
+        auto f = std::find(node->Mother->kind.begin(), node->Mother->kind.end(), node);
         if (*f != nullptr and (*f)->Type == "ELSE")
             addInstrToCompiledCode("JMP", "ELSE_END");
 

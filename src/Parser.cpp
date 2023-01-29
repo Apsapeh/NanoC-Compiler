@@ -201,7 +201,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
     }
     ParsedProgram = Program;
     uint32_t kind_counter = 0;
-    recursionNodePrint(Program, kind_counter);
+    //recursionNodePrint(Program, kind_counter);
 }
 
 Node *Parser::getParsedProgram() {

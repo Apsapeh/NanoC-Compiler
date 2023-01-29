@@ -9,6 +9,7 @@ int num3 = num1 + num2 + num3;
 
 if (true and not false) {
     int num4 = 1;
+    print(num4);
 }
 else{int a = 3;}
 
@@ -16,13 +17,14 @@ int num4 = 0;
 int num9 = 0;
 while (true)
 {
+    print(0);
     if(num4 == 12345)
     {
 
     }
     else
     {
-        num9 = num4 + 1;
+        //num4 = num4 + 1;
     }
 }
 

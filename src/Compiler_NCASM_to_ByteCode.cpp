@@ -1,15 +1,19 @@
 #include "Compiler_NCASM_to_ByteCode.h"
 
+int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,
+                    u_int64_t start_pose, std::string el_to_find);
+
 Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code) {
     std::map<std::string, u_int64_t> vars_heap_binds;
     u_int64_t heap_size = 0;
 
+    u_int64_t num = 0;
     for (Compiler_to_NCASM::NCASM_Instruction instr : *ncasm_code)
     {
         std::string OPCode = instr.OPcode;
 
         if (OPCode == "PUSH_TO_STACK") {
-            addInstrToCompiledCode(5, 8);
+            addInstrToCompiledCode(5, 8, 8);
             vars_heap_binds[instr.Args[1]] = heap_size;
             ++heap_size;
         }
@@ -21,11 +25,15 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
             }
             addInstrToCompiledCode(6, 8, iter->second, 8, regs_bind[instr.Args[1]]);
         }
-        else if (OPCode == "SET") {
-            addInstrToCompiledCode(10, 8, std::stoll(instr.Args[0]), 8, regs_bind[instr.Args[1]]);
+
+        else if (OPCode == "COPY") {
+            addInstrToCompiledCode(8, 8, regs_bind[instr.Args[0]], 8, regs_bind[instr.Args[1]]);
         }
         else if (OPCode == "MOV") {
             addInstrToCompiledCode(9, 8, regs_bind[instr.Args[0]], 8, regs_bind[instr.Args[1]]);
+        }
+        else if (OPCode == "SET") {
+            addInstrToCompiledCode(10, 8, std::stoll(instr.Args[0]), 8, regs_bind[instr.Args[1]]);
         }
 
         else if (OPCode == "ADD") {
@@ -41,35 +49,36 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
             addInstrToCompiledCode(14, 8, regs_bind[instr.Args[0]], 8, regs_bind[instr.Args[1]]);
         }
         else if (OPCode == "JEQ") {
-
+            addInstrToCompiledCode(15, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JNEQZ") {
-
+            addInstrToCompiledCode(16, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JLESS") {
-
+            addInstrToCompiledCode(17, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JMORE") {
-
+            addInstrToCompiledCode(18, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JNEQ") {
-
+            addInstrToCompiledCode(19, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JNNEQ") {
-
+            addInstrToCompiledCode(20, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JNLESS") {
-
+            addInstrToCompiledCode(21, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JNMORE") {
-
+            addInstrToCompiledCode(22, 8, getJMP_Size(ncasm_code, num, instr.Args[1]), 8, regs_bind[instr.Args[0]]);
         }
         else if (OPCode == "JMP") {
-
+            addInstrToCompiledCode(23, 8, getJMP_Size(ncasm_code, num, instr.Args[0]));
         }
         else if (OPCode == "CONVERT_TO_LOGICAL") {
             addInstrToCompiledCode(24, 8, regs_bind[instr.Args[0]], 8, regs_bind[instr.Args[1]]);
         }
+
         else if (OPCode == "LAND") {
             addInstrToCompiledCode(25, 8, regs_bind[instr.Args[0]], 8, regs_bind[instr.Args[1]]);
         }
@@ -80,6 +89,20 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
             addInstrToCompiledCode(27, 8, regs_bind[instr.Args[0]], 8, regs_bind[instr.Args[1]]);
         }
 
+        else if (OPCode == "PRINT") {
+            addInstrToCompiledCode(50, 8, regs_bind[instr.Args[0]]);
+        }
+
+        ++num;
+    }
+
+    for (VirtualMachine_NC_BYTE::ASM_Instruction instr : compiledNCASM) {
+        std::cout << (int)instr.Command;
+        if (instr.val1 != nullptr)
+            std::cout << " " << *(int64_t*)instr.val1;
+        if (instr.val2 != nullptr)
+            std::cout << " " << *(int64_t*)instr.val2;
+        std::cout << "\n";
     }
 }
 
@@ -97,27 +120,60 @@ void Compiler_NCASM_to_ByteCode::addInstrToCompiledCode(u_int8_t OPCode, u_int64
         temp.val2 = malloc(v2_size);
         *(int64_t*)temp.val2 = v2_data;
     }
+
+    compiledNCASM.push_back(temp);
+}
+
+std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> Compiler_NCASM_to_ByteCode::getCompiledCode() {
+    return compiledNCASM;
 }
 
 int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,
                     u_int64_t start_pose, std::string el_to_find)
 {
     u_int64_t count_of_bad = 1;
+    u_int64_t count_of_labels = 0;
 
-    for (u_int64_t index=start_pose; index < ncasm_code->size(), ++index;)
-    {
-        if (el_to_find == "ELSE_BEGIN" or el_to_find == "ELSE_END") {
-            if ((*ncasm_code)[index].OPcode == "IF_BEGIN")
+    if (el_to_find == "ELSE_BEGIN" or el_to_find == "ELSE_END" or el_to_find == "WHILE_END") {
+        for (u_int64_t index = start_pose; index < ncasm_code->size(), ++index;) {
+            if ((*ncasm_code)[index].OPcode == "IF_BEGIN" or (*ncasm_code)[index].OPcode == "ELSE_BEGIN" or
+                (*ncasm_code)[index].OPcode == "ELSE_END" or (*ncasm_code)[index].OPcode == "WHILE_BEGIN" or
+                (*ncasm_code)[index].OPcode == "WHILE_END")
+            {
+                ++count_of_labels;
+            }
+
+            if (((*ncasm_code)[index].OPcode == "IF_BEGIN" and el_to_find != "WHILE_END") or
+                ((*ncasm_code)[index].OPcode == "WHILE_BEGIN" and el_to_find == "WHILE_END"))
             {
                 ++count_of_bad;
             }
-            else if ((*ncasm_code)[index].OPcode == "ELSE_BEGIN")
-            {
+            else if (((*ncasm_code)[index].OPcode == "ELSE_BEGIN" and el_to_find != "WHILE_END") or
+                     ((*ncasm_code)[index].OPcode == "WHILE_END" and el_to_find == "WHILE_END")) {
                 --count_of_bad;
             }
 
-            if ((*ncasm_code)[index].OPcode == el_to_find and count_of_bad == 0)
+            if ((*ncasm_code)[index].OPcode == el_to_find and count_of_bad == 0) {
+                return index - start_pose - 1 - count_of_labels;
+            }
             //(*ncasm_code)[index].OPcode == "IF_BEGIN"
+
+        }
+    }
+    else if (el_to_find == "WHILE_BEGIN") {
+        for (u_int64_t index = start_pose; index > 0, --index;) {
+            if ((*ncasm_code)[index].OPcode == "WHILE_END") {
+                ++count_of_bad;
+            }
+            else if ((*ncasm_code)[index].OPcode == "WHILE_BEGIN") {
+                --count_of_bad;
+            }
+
+            if ((*ncasm_code)[index].OPcode == el_to_find and count_of_bad == 0) {
+                return index - start_pose - 1 + count_of_labels;
+            }
+            //(*ncasm_code)[index].OPcode == "IF_BEGIN"
+
         }
     }
 }

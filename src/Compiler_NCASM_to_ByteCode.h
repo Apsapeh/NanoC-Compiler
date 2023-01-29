@@ -17,4 +17,5 @@ private:
                                                             u_int64_t v2_size = 0, int64_t v2_data = 0);
 public:
     Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code);
+    std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> getCompiledCode();
 };
