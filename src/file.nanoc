@@ -2,12 +2,32 @@
 /*Cumment*/
 
 #define true 1 // Чтобы VSC не ругалась на ошибки
-//int a = 3;
-//int num = a;
-int num = (1 + 2);
-if (1 + 2 == 1) {
-    num = 6;
+
+int num1 = 5 + 3 + (2 - 1);
+int num2 = num1;
+int num3 = num1 + num2 + num3;
+
+if (true and not false) {
+    int num4 = 1;
 }
+else{int a = 3;}
+
+int num4 = 0;
+int num9 = 0;
+while (true)
+{
+    if(num4 == 12345)
+    {
+
+    }
+    else
+    {
+        num9 = num4 + 1;
+    }
+}
+
+num4 = 3 + 2 + 1;
+
 /*int ass(int num)
 {
 	int a = num;

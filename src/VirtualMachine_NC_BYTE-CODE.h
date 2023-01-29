@@ -27,11 +27,12 @@
  * 20 - jump on val bytes if not (r1 = 0)   (val) (r1)
  * 21 - jump on val bytes if not (r1 < 0)   (val) (r1)
  * 22 - jump on val bytes if not (r1 > 0)   (val) (r1)
+ * 23 - jump on val bytes                   (val)
  *
- * 23 - convert val to logical 1 or 0       (val) (r1)
- * 24 - (AND) if r1 + r2 == 2 write 1 to r2 (r1) (r2)
- * 25 - (OR)  if r2 + r1 != 0 write 1 to r2 (r1) (r2)
- * 26 - (NOT) !r1 write to r2               (r1) (r2)
+ * 24 - convert r1 to logical 1 or 0        (r1) (r2)
+ * 25 - (AND) if r1 + r2 == 2 write 1 to r2 (r1) (r2)
+ * 26 - (OR)  if r2 + r1 != 0 write 1 to r2 (r1) (r2)
+ * 27 - (NOT) !r1 write to r2               (r1) (r2)
  *
  * 50 - print r1
 */

@@ -9,8 +9,7 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
     void** dyn_stack = (void**)malloc(0);
     void** heap = (void**)malloc(0);
     heapNullChunk* heap_null_chunks_arr =  (heapNullChunk*) malloc(0);
-    std::map <u_int64_t, u_int64_t> heap_vars_bind;
-
+    std::map <u_int64_t, u_int64_t> heap_var;
 
     void* registers[6] {malloc(8), malloc(8), malloc(8),
                         malloc(8), malloc(8), malloc(8)};
@@ -123,17 +122,20 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
                     num_of_instr += *(u_int64_t*)inst->val1;
                 break;
             case 22:
+                    num_of_instr += *(u_int64_t*)inst->val1;
+                break;
+            case 23:
                 if (*(u_int64_t *) registers[*(u_int64_t *) inst->val2] <= 0)
                     num_of_instr += *(u_int64_t*)inst->val1;
                 break;
 
-            case 23:
+            case 24:
                 if (*(u_int64_t*)registers[*(u_int64_t*)inst->val1] != 0)
                     *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 1;
                 else
                     *(u_int64_t*)registers[*(u_int64_t*)inst->val2] = 0;
                 break;
-            case 24: {
+            case 25: {
                 if (*(u_int64_t *) registers[*(u_int64_t *) inst->val1] and
                         *(u_int64_t *) registers[*(u_int64_t *) inst->val2])
                     *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 1;
@@ -141,7 +143,7 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
                     *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 0;
                 break;
             }
-            case 25: {
+            case 26: {
                 if (*(u_int64_t *) registers[*(u_int64_t *) inst->val1] or
                     *(u_int64_t *) registers[*(u_int64_t *) inst->val2])
                     *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 1;
@@ -149,7 +151,7 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
                     *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 0;
                 break;
             }
-            case 26:
+            case 27:
                 *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = !*(u_int64_t *) registers[*(u_int64_t *) inst->val1];
                 break;
             case 50:
