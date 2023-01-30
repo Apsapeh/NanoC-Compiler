@@ -121,10 +121,14 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
         }
     }
     --k_c;
+
     if (node->Type == "IF") {
-        auto f = std::find(node->Mother->kind.begin(), node->Mother->kind.end(), node) + 1;
-        if (*f != nullptr and (*f)->Type == "ELSE")
-            addInstrToCompiledCode("JMP", "ELSE_END");
+        auto f = std::find(node->Mother->kind.begin(), node->Mother->kind.end(), node);
+        if (f != node->Mother->kind.end()-1)
+        {
+            if ((*(f+1))->Type == "ELSE")
+                addInstrToCompiledCode("JMP", "ELSE_END");
+        }
 
         addInstrToCompiledCode("ELSE_BEGIN");
     }
@@ -216,7 +220,7 @@ void Compiler_to_NCASM::recursionMathExpCompiler(Parser::Node *node, int64_t num
         else if (node->Type == "LEQUAL")
             addInstrToCompiledCode("JNNEQ", "math_r0", go_to_lbl);
         else if (node->Type == "LNOT_EQ")
-            addInstrToCompiledCode("JEQ", "math_r0", go_to_lbl);
+            addInstrToCompiledCode("JNEQZ", "math_r0", go_to_lbl);
     }
 
     std::string mov_to_reg = "";

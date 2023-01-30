@@ -91,6 +91,11 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
                 *(int64_t*)registers[*(u_int64_t*)inst->val2] *= *(int64_t*)registers[*(u_int64_t*)inst->val1];
                 break;
             case 14:
+                if (*(int64_t*)registers[*(u_int64_t*)inst->val1] == 0)
+                {
+                    std::cout << "Error: Zero Divide" << std::endl;
+                    exit(1);
+                }
                 *(int64_t*)registers[*(u_int64_t*)inst->val2] /= *(int64_t*)registers[*(u_int64_t*)inst->val1];
                 break;
 
