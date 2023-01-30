@@ -35,6 +35,7 @@
  * 27 - (NOT) !r1 write to r2               (r1) (r2)
  *
  * 50 - print r1
+ * 51 - set val as new
 */
 
 //typedef uint64_t u_int64_t;

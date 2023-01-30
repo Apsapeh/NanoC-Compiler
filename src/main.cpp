@@ -88,12 +88,13 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    //std::vector 
+    //std::vector
 
     Lexer lexer(source_code);
     Parser parser(lexer.getTokenizedSource(), lexer.getTokensInfo());
     Compiler_to_NCASM comp_to_ncasm(parser.getParsedProgram());
     Compiler_NCASM_to_ByteCode comp_ncasm_to_byte(comp_to_ncasm.getCompiledCode());
+    comp_ncasm_to_byte.saveCompiledProgram_to_file("asm.asm");
 
     std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> vasm = comp_ncasm_to_byte.getCompiledCode();
     VirtualMachine_NC_BYTE::ASM_Instruction vasm2[vasm.size()];

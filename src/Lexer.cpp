@@ -337,6 +337,13 @@ Lexer::Lexer(std::string sourceCode)
                 tempVecTokInfo.push_back("~~~");
                 continue;
             }
+
+            if (exp_string == "break")
+            {
+                tempVecTok.push_back("BREAK");
+                tempVecTokInfo.push_back("~~~");
+                continue;
+            }
            /* if(exp_string == "true")
             {
                 // TRUE

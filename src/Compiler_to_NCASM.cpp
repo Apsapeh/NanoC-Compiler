@@ -7,7 +7,7 @@ Compiler_to_NCASM::Compiler_to_NCASM(Parser::Node* node)
     uint64_t kind_counter = 0;
     recursionNodeParse(node, kind_counter, PROGRAM);
 
-    for (NCASM_Instruction inst : CompiledCode) {
+    /*for (NCASM_Instruction inst : CompiledCode) {
         std::cout << inst.OPcode;
 
         for (auto c : inst.Args)
@@ -15,7 +15,7 @@ Compiler_to_NCASM::Compiler_to_NCASM(Parser::Node* node)
             std:: cout << "  " << c;
         }
         std::cout << "\n";
-    }
+    }*/
 }
 
 void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
@@ -32,20 +32,24 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
     else if (node->Type == "ASSIGN")
     {
         new_parrent_type == ASSIGN;
-        addInstrToCompiledCode("LOAD", node->kind[0]->Info, "tmp_r0");
 
         if (node->kind[1]->Type == "VALUE") {
+            addInstrToCompiledCode("LOAD", node->kind[0]->Info, "tmp_r0");
             addInstrToCompiledCode("SET", node->kind[1]->Info, "tmp_r0");
         }
         else if (node->kind[1]->Type == "VAR_NAME") {
+            addInstrToCompiledCode("LOAD", node->kind[0]->Info, "tmp_r0");
             addInstrToCompiledCode("LOAD", node->kind[1]->Info, "tmp_r1");
             addInstrToCompiledCode("COPY", "tmp_r1", "tmp_r0");
         }
         else {
             recursionMathExpCompiler(node->kind[1], -1);
 
+            addInstrToCompiledCode("LOAD", node->kind[0]->Info, "tmp_r0");
             addInstrToCompiledCode("COPY", "math_r0", "tmp_r0");
         }
+
+
         return;
     }
     else if (node->Type == "IF" or node->Type == "WHILE")
@@ -58,7 +62,7 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
 
         if (arg_type == "VALUE" or arg_type == "VAR_NAME") {
             if (arg_type == "VALUE") {
-                addInstrToCompiledCode("SET", node->kind[0]->kind[0]->Info, "math_r0");
+                addInstrToCompiledCode("SET_NEW", node->kind[0]->kind[0]->Info, "math_r0");
             }
             else
             {
@@ -99,6 +103,11 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
         addInstrToCompiledCode("PRINT", "tmp_r0");
     }
 
+    else if (node->Type == "BREAK")
+    {
+        addInstrToCompiledCode("JMP", "WHILE_END");
+    }
+
     ++k_c;
     for (Parser::Node *kind : node->kind)
     {
@@ -113,7 +122,7 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
     }
     --k_c;
     if (node->Type == "IF") {
-        auto f = std::find(node->Mother->kind.begin(), node->Mother->kind.end(), node);
+        auto f = std::find(node->Mother->kind.begin(), node->Mother->kind.end(), node) + 1;
         if (*f != nullptr and (*f)->Type == "ELSE")
             addInstrToCompiledCode("JMP", "ELSE_END");
 
@@ -165,14 +174,14 @@ void Compiler_to_NCASM::recursionMathExpCompiler(Parser::Node *node, int64_t num
     }
 
     if (!val1.empty()) {
-        addInstrToCompiledCode("SET", val1, "math_r0");
+        addInstrToCompiledCode("SET_NEW", val1, "math_r0");
     }
     else if (!pass_val1) {
         addInstrToCompiledCode("MOV", "math_r2", "math_r0");
     }
 
     if (!val2.empty()) {
-        addInstrToCompiledCode("SET", val2, "math_r1");
+        addInstrToCompiledCode("SET_NEW", val2, "math_r1");
     }
     else if (!pass_val2 and node->Type != "LNOT") {
         addInstrToCompiledCode("MOV", "math_r3", "math_r1");
@@ -187,20 +196,27 @@ void Compiler_to_NCASM::recursionMathExpCompiler(Parser::Node *node, int64_t num
             addInstrToCompiledCode(node->Type, "math_r0", "math_r0");
         else {
             addInstrToCompiledCode("CONVERT_TO_LOGICAL", "math1", "math1");
-            addInstrToCompiledCode(node->Type, "math1", "math0");
+            addInstrToCompiledCode(node->Type, "math_r1", "math_r0");
         }
     }
     else
     {
-        addInstrToCompiledCode("MINUS", "math1", "math0");
+        std::string go_to_lbl;
+        if (node->Mother->Type == "IF")
+            go_to_lbl = "ELSE_BEGIN";
+        else if (node->Mother->Type == "WHILE")
+            go_to_lbl = "WHILE_END";
+
+
+        addInstrToCompiledCode("MINUS", "math_r1", "math_r0");
         if (node->Type == "LLESS")
-            addInstrToCompiledCode("JNLESS", "math_r0", "ELSE_BEGIN");
+            addInstrToCompiledCode("JNLESS", "math_r0", go_to_lbl);
         else if (node->Type == "LMORE")
-            addInstrToCompiledCode("JNMORE", "math_r0", "ELSE_BEGIN");
+            addInstrToCompiledCode("JNMORE", "math_r0", go_to_lbl);
         else if (node->Type == "LEQUAL")
-            addInstrToCompiledCode("JNNEQ", "math_r0", "ELSE_BEGIN");
+            addInstrToCompiledCode("JNNEQ", "math_r0", go_to_lbl);
         else if (node->Type == "LNOT_EQ")
-            addInstrToCompiledCode("JEQ", "math_r0", "ELSE_BEGIN");
+            addInstrToCompiledCode("JEQ", "math_r0", go_to_lbl);
     }
 
     std::string mov_to_reg = "";

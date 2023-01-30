@@ -3,7 +3,7 @@ typedef Parser::Node Node;
 
 unsigned int findToken(std::vector<std::string> &vec, std::string str);
 static void recursionNodePrint (Node *node, uint32_t &n_c);
-Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::string> expression_info, Node *mother_node = nullptr,std::string lmore = "", u_int32_t lmore_index = 0);
+Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::string> expression_info, Node *mother_node, std::string lmore = "", u_int32_t lmore_index = 0);
 Node* recursionFuncParser(std::vector<std::string> expression, std::vector<std::string> expression_info , std::string name);
 
 
@@ -83,7 +83,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
                 tempN->Mother = MotherNode;
                 MotherNode->kind.push_back(tempN);
 
-                if (token_num > 0 and *(&Token-1) == "IF") {
+                if (token_num > 0 and (*(&Token-1) == "IF" or *(&Token-1) == "WHILE")) {
                     int count_of_argsBr = 1;
                     int fn_call_start = token_num+1;
                     for (uint32_t i = token_num + 1; i < VecLine.size(); ++i) {
@@ -96,7 +96,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
 
                         if (count_of_argsBr == 0) {
                             tempN->kind.push_back(recursionMathParser(std::vector<std::string>(VecLine.begin() + fn_call_start, VecLine.begin() + i),
-                                                                           std::vector<std::string>(VecLineInfo.begin() + fn_call_start, VecLineInfo.begin() + i)));
+                                                                      std::vector<std::string>(VecLineInfo.begin() + fn_call_start, VecLineInfo.begin() + i), MotherNode));
                             token_num = i;
                             break;
                         }
@@ -192,9 +192,16 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
                     exit(1);
                 }
                 tempN->kind.push_back(recursionMathParser(std::vector<std::string> (VecLine.begin()+token_num+1, VecLine.end()),
-                                                          std::vector<std::string> (VecLineInfo.begin()+token_num+1, VecLineInfo.end())));
+                                                          std::vector<std::string> (VecLineInfo.begin()+token_num+1, VecLineInfo.end()), MotherNode));
                 MotherNode->kind.push_back(tempN);
                 break;
+            }
+
+            else if (Token == "BREAK") {
+                tempN = new Node;
+                tempN->Type = Token;
+                tempN->Mother = MotherNode;
+                MotherNode->kind.push_back(tempN);
             }
 
         }
@@ -280,7 +287,7 @@ Node* recursionFuncParser(std::vector<std::string> expression, std::vector<std::
                                                        std::vector<std::string> (exp_info.begin()+2, exp_info.end()-1),exp_info[0]));
         }
         else if (isMathExp(exp)) {
-            result->kind.push_back(recursionMathParser(exp, exp_info));
+            result->kind.push_back(recursionMathParser(exp, exp_info, nullptr));
         }
         else if (exp.size() > 0)
         {
@@ -308,9 +315,9 @@ Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::
     {
         u_int32_t rbrac_count = 0;
         for (u_int32_t token_num=0; token_num < expression.size(); ++token_num) {
-
             if (lmore != "") {
                 result->Type = lmore;
+                result->Mother = mother_node;
                 result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin(), expression.begin()+lmore_index),
                                                            std::vector<std::string>(expression_info.begin(), expression_info.begin()+lmore_index), result));
                 result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+lmore_index+1, expression.end()),
@@ -319,6 +326,7 @@ Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::
             }
 
             if (expression[token_num] == math_token and rbrac_count == 0) {
+                result->Mother = mother_node;
                 if (expression[token_num] == "DIVIDE") {
                     for (u_int32_t i = expression.size()-1; i > 0; --i) {
                         if (expression[i] == "DIVIDE") {
@@ -330,6 +338,7 @@ Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::
 
                 if (expression[token_num] == "LNOT") {
                     result->Type = math_token;
+                    result->Mother = mother_node;
                     result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+token_num+1, expression.end()),
                                                                std::vector<std::string>(expression_info.begin()+token_num+1, expression_info.end()), result));
                     return result;
@@ -337,12 +346,14 @@ Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::
 
                 if (expression[token_num] == "" or expression[token_num] == "") {
                     result->Type = "LOR";
+                    result->Mother = mother_node;
                     result->kind.push_back(recursionMathParser(expression, expression_info, result, (std::string) expression[token_num], token_num));
                     result->kind.push_back(recursionMathParser(expression, expression_info, result, "LEQUAL", token_num));
                     return result;
                 }
 
                 result->Type = math_token;
+                result->Mother = mother_node;
                 result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin(), expression.begin()+token_num),
                                                            std::vector<std::string>(expression_info.begin(), expression_info.begin()+token_num), result));
                 result->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+token_num+1, expression.end()),
@@ -358,12 +369,13 @@ Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::
 
                 if (mother_node == nullptr) {
                     result = recursionMathParser(std::vector<std::string>(expression.begin()+1, expression.end()-1),
-                                                 std::vector<std::string>(expression_info.begin()+1, expression_info.end()-1));
+                                                 std::vector<std::string>(expression_info.begin()+1, expression_info.end()-1), result);
+                    result->Mother = mother_node;
                     return result;
                 }
                 else {
                     mother_node->kind.push_back(recursionMathParser(std::vector<std::string>(expression.begin()+1, expression.end()-1),
-                                                                    std::vector<std::string>(expression_info.begin()+1, expression_info.end()-1)));
+                                                                    std::vector<std::string>(expression_info.begin()+1, expression_info.end()-1), mother_node));
                     return nullptr;
                 }
 
@@ -389,6 +401,7 @@ Node* recursionMathParser(std::vector<std::string> expression, std::vector<std::
     }
 
     result->Type = expression[0];
+    result->Mother = mother_node;
     if (expression_info[0] != "~~~")
         result->Info = expression_info[0];
     return result;

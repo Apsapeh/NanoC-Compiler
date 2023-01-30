@@ -1,4 +1,5 @@
 #include "Compiler_NCASM_to_ByteCode.h"
+#include <fstream>
 
 int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,
                     u_int64_t start_pose, std::string el_to_find);
@@ -34,6 +35,9 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
         }
         else if (OPCode == "SET") {
             addInstrToCompiledCode(10, 8, std::stoll(instr.Args[0]), 8, regs_bind[instr.Args[1]]);
+        }
+        else if (OPCode == "SET_NEW") {
+            addInstrToCompiledCode(51, 8, std::stoll(instr.Args[0]), 8, regs_bind[instr.Args[1]]);
         }
 
         else if (OPCode == "ADD") {
@@ -96,14 +100,16 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
         ++num;
     }
 
+    /*u_int64_t num5 = 0;
     for (VirtualMachine_NC_BYTE::ASM_Instruction instr : compiledNCASM) {
-        std::cout << (int)instr.Command;
+        std::cout << num5 << " --- " << (int)instr.Command;
         if (instr.val1 != nullptr)
             std::cout << " " << *(int64_t*)instr.val1;
         if (instr.val2 != nullptr)
             std::cout << " " << *(int64_t*)instr.val2;
         std::cout << "\n";
-    }
+        ++num5;
+    }*/
 }
 
 void Compiler_NCASM_to_ByteCode::addInstrToCompiledCode(u_int8_t OPCode, u_int64_t v1_size, int64_t v1_data,
@@ -126,6 +132,26 @@ void Compiler_NCASM_to_ByteCode::addInstrToCompiledCode(u_int8_t OPCode, u_int64
 
 std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> Compiler_NCASM_to_ByteCode::getCompiledCode() {
     return compiledNCASM;
+}
+
+void Compiler_NCASM_to_ByteCode::saveCompiledProgram_to_file(std::string FileName) {
+    std::string str;
+    for (VirtualMachine_NC_BYTE::ASM_Instruction instr : compiledNCASM) {
+        str += std::to_string((int)instr.Command);
+        if (instr.val1 != nullptr)
+            str += " " + std::to_string(*(int64_t*)instr.val1);
+        if (instr.val2 != nullptr)
+            str += " " + std::to_string(*(int64_t*)instr.val2);
+        str += "\n";
+    }
+
+    std::ofstream out;          // поток для записи
+    out.open(FileName); // окрываем файл для записи
+    if (out.is_open())
+    {
+        out << str;
+    }
+    out.close();
 }
 
 int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,
@@ -154,7 +180,7 @@ int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_cod
             }
 
             if ((*ncasm_code)[index].OPcode == el_to_find and count_of_bad == 0) {
-                return index - start_pose - 1 - count_of_labels;
+                return index - start_pose - count_of_labels;
             }
             //(*ncasm_code)[index].OPcode == "IF_BEGIN"
 
@@ -162,6 +188,13 @@ int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_cod
     }
     else if (el_to_find == "WHILE_BEGIN") {
         for (u_int64_t index = start_pose; index > 0, --index;) {
+            if ((*ncasm_code)[index].OPcode == "IF_BEGIN" or (*ncasm_code)[index].OPcode == "ELSE_BEGIN" or
+                (*ncasm_code)[index].OPcode == "ELSE_END" or (*ncasm_code)[index].OPcode == "WHILE_BEGIN" or
+                (*ncasm_code)[index].OPcode == "WHILE_END")
+            {
+                ++count_of_labels;
+            }
+
             if ((*ncasm_code)[index].OPcode == "WHILE_END") {
                 ++count_of_bad;
             }
@@ -170,7 +203,7 @@ int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_cod
             }
 
             if ((*ncasm_code)[index].OPcode == el_to_find and count_of_bad == 0) {
-                return index - start_pose - 1 + count_of_labels;
+                return index - start_pose + count_of_labels - 1;
             }
             //(*ncasm_code)[index].OPcode == "IF_BEGIN"
 
