@@ -5,119 +5,74 @@
 */
 
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <string>
 #include <chrono>
 
 #include "../VirtualMachine_NC_BYTE-CODE.h"
 
-int main(int argc, char *argv[])
-{
+typedef uint64_t u_int64_t;
+typedef uint32_t u_int32_t;
+typedef uint16_t u_int16_t;
+typedef uint8_t u_int8_t;
+
+int main(int argc, char *argv[]) {
     std::ios_base::sync_with_stdio(false);
 
     std::string file_name = "";
-    if (argc > 1)
-    {
+    if (argc > 1) {
         file_name = argv[1];
-    }
-    else
-    {
+    } else {
         std::cout << "Error: Not enough command line arguments\n";
         return -1;
     }
 
-    std::string source_code = "";
-    std::string formated_source_code = "";
-
     std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> code;
 
-    std::string *temp_str = new std::string("");
-    std::ifstream in(file_name);
-    if(in.is_open())
-    {
-        while(getline(in, *temp_str)) {
-            std::string tmp;
-            VirtualMachine_NC_BYTE::ASM_Instruction tmp_asm;
-            int op_num = 0;
-            if (*temp_str == "##")
+    FILE *f = fopen("byte", "rb");
+
+    u_int8_t arg_count = 0;
+    u_int8_t arg_num = 0;
+    u_int8_t op = 0;
+    u_int8_t current_length = 0;
+    VirtualMachine_NC_BYTE::ASM_Instruction temp_asm_instr;
+    while (true) {
+        if (arg_count == 0) {
+            if (op != 0) {
+                code.push_back(temp_asm_instr);
+                temp_asm_instr.val1 = nullptr;
+                temp_asm_instr.val2 = nullptr;
+            }
+
+            fread(&op, 1, 1, f);
+            if (op == 0){
                 break;
-            for (char &a : *temp_str)
-            {
-                if (a == ' ' or a == '\n')
-                {
-
-                    if (op_num == 0) {
-                        tmp_asm.Command = std::stoll(tmp);
-                        ++op_num;
-                    }
-                    else if (op_num == 1) {
-                        tmp_asm.val1 = new int64_t(std::stoll(tmp));
-                        ++op_num;
-                    }
-                    else if (op_num == 2) {
-                        tmp_asm.val2 = new int64_t(std::stoll(tmp));
-                        ++op_num;
-                    }
-
-                    tmp.clear();
-                }
-                else {
-                    tmp.push_back(a);
-                }
             }
+            temp_asm_instr.Command = op;
+            arg_num = 0;
 
-            if (op_num == 1) {
-                tmp_asm.val1 = new u_int64_t(std::stoi(tmp));
-                ++op_num;
-            }
-            else if (op_num == 2) {
-                tmp_asm.val2 = new u_int64_t(std::stoi(tmp));
-                ++op_num;
-            }
-
-            code.push_back(tmp_asm);
-        }
-
-    }
-    else
-        std::cout << "Error: File not founded" << std::endl;
-    in.close();
-    delete temp_str;
-
-    FILE *f = fopen("byte", "wb");
-    //for (int a = 0; a < 1; ++a)
-
-    for (VirtualMachine_NC_BYTE::ASM_Instruction i : code) {
-        unsigned char sep = 0;
-        fwrite(&i.Command, 1, 1, f);
-
-        if (i.val1 != nullptr) {
-            if (*(u_int64_t*)i.val1 < 256)
-                fwrite(&*(u_int8_t*)i.val1, 1, 1, f);
-            else if (*(u_int64_t*)i.val1 < 65536)
-                fwrite(&*(u_int16_t*)i.val1, 2, 1, f);
-            else if (*(u_int64_t*)i.val1 < 4294967296)
-                fwrite(&*(u_int32_t*)i.val1, 4, 1, f);
+            if (op == 3 or op == 5 or op == 7 or op == 23 or op == 50)
+                arg_count = 1;
             else
-                fwrite(&*(u_int64_t*)i.val1, 8, 1, f);
-            fwrite(&sep, 1, 1, f);
+                arg_count = 2;
         }
+        else {
+            if (current_length == 0) {
+                fread(&current_length, 1, 1, f);
+            }
+            else {
+                int8_t arg;
+                fread(&arg, current_length, 1, f);
+                if (arg_num == 0)
+                    temp_asm_instr.val1 = new int64_t(arg);
+                else
+                    temp_asm_instr.val2 = new int64_t(arg);
 
-        if (i.val2 != nullptr) {
-            if (*(u_int64_t*)i.val2 < 256)
-                fwrite(&*(u_int8_t*)i.val2, 1, 1, f);
-            else if (*(u_int64_t*)i.val2 < 65536)
-                fwrite(&*(u_int16_t*)i.val2, 2, 1, f);
-            else if (*(u_int64_t*)i.val2 < 4294967296)
-                fwrite(&*(u_int32_t*)i.val2, 4, 1, f);
-            else
-                fwrite(&*(u_int64_t*)i.val2, 8, 1, f);
-            fwrite(&sep, 1, 1, f);
+                current_length = 0;
+                ++arg_num;
+                --arg_count;
+            }
         }
     }
-
-    fclose(f);
 
 
     VirtualMachine_NC_BYTE::ASM_Instruction vasm2[code.size()];

@@ -200,6 +200,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
             else if (Token == "BREAK") {
                 tempN = new Node;
                 tempN->Type = Token;
+
                 tempN->Mother = MotherNode;
                 MotherNode->kind.push_back(tempN);
             }
@@ -208,7 +209,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
     }
     ParsedProgram = Program;
     uint32_t kind_counter = 0;
-    //recursionNodePrint(Program, kind_counter);
+    recursionNodePrint(Program, kind_counter);
 }
 
 Node *Parser::getParsedProgram() {

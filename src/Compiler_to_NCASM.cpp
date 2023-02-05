@@ -7,7 +7,7 @@ Compiler_to_NCASM::Compiler_to_NCASM(Parser::Node* node)
     uint64_t kind_counter = 0;
     recursionNodeParse(node, kind_counter, PROGRAM);
 
-    /*for (NCASM_Instruction inst : CompiledCode) {
+    for (NCASM_Instruction inst : CompiledCode) {
         std::cout << inst.OPcode;
 
         for (auto c : inst.Args)
@@ -15,7 +15,7 @@ Compiler_to_NCASM::Compiler_to_NCASM(Parser::Node* node)
             std:: cout << "  " << c;
         }
         std::cout << "\n";
-    }*/
+    }
 }
 
 void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,

@@ -1,5 +1,6 @@
 #include "Compiler_NCASM_to_ByteCode.h"
 #include <fstream>
+#include <stdlib.h>
 
 int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,
                     u_int64_t start_pose, std::string el_to_find);
@@ -100,7 +101,7 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
         ++num;
     }
 
-    /*u_int64_t num5 = 0;
+    u_int64_t num5 = 0;
     for (VirtualMachine_NC_BYTE::ASM_Instruction instr : compiledNCASM) {
         std::cout << num5 << " --- " << (int)instr.Command;
         if (instr.val1 != nullptr)
@@ -109,7 +110,7 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
             std::cout << " " << *(int64_t*)instr.val2;
         std::cout << "\n";
         ++num5;
-    }*/
+    }
 }
 
 void Compiler_NCASM_to_ByteCode::addInstrToCompiledCode(u_int8_t OPCode, u_int64_t v1_size, int64_t v1_data,
@@ -135,7 +136,72 @@ std::vector<VirtualMachine_NC_BYTE::ASM_Instruction> Compiler_NCASM_to_ByteCode:
 }
 
 void Compiler_NCASM_to_ByteCode::saveCompiledProgram_to_file(std::string FileName) {
-    std::string str;
+    FILE *f = fopen("byte", "wb");
+
+    unsigned char tmp;
+    for (VirtualMachine_NC_BYTE::ASM_Instruction instr : compiledNCASM) {
+        std::cout << (int)instr.Command << std::endl;
+        fwrite(&instr.Command, 1, 1, f);
+
+        if (instr.val1 != nullptr)
+        {
+            if (*(int64_t*)instr.val1 > -129 and *(int64_t*)instr.val1 < 128){
+                tmp = 1;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int8_t*)instr.val1, 1, 1, f);
+            }
+            else if (*(int64_t*)instr.val1 > -32769 and *(int64_t*)instr.val1 < 32768) {
+                tmp = 2;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int16_t*)instr.val1, 2, 1, f);
+            }
+            else if (*(int64_t*)instr.val1 > -2147483649 and *(int64_t*)instr.val1 < 2147483648) {
+                tmp = 4;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int32_t*)instr.val1, 4, 1, f);
+            }
+            else {
+                tmp = 8;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int64_t*)instr.val1, 8, 1, f);
+            }
+        }
+
+        if (instr.val2 != nullptr)
+        {
+            if (*(int64_t*)instr.val2 > -129 and *(int64_t*)instr.val2 < 128){
+                tmp = 1;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int8_t*)instr.val2, 1, 1, f);
+            }
+            else if (*(int64_t*)instr.val2 > -32769 and *(int64_t*)instr.val2 < 32768) {
+                tmp = 2;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int16_t*)instr.val2, 2, 1, f);
+            }
+            else if (*(int64_t*)instr.val2 > -2147483649 and *(int64_t*)instr.val2 < 2147483648) {
+                tmp = 4;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int32_t*)instr.val2, 4, 1, f);
+            }
+            else {
+                tmp = 8;
+                fwrite(&tmp, 1, 1, f);
+                fwrite((int64_t*)instr.val2, 8, 1, f);
+            }
+        }
+        /*if (instr.val2 != nullptr)
+        {
+            tmp = 8;
+            fwrite(&tmp, 1, 1, f);
+            fwrite((int64_t*)instr.val2, 8, 1, f);
+        }*/
+    }
+    tmp = 0;
+    fwrite(&tmp, 1, 1, f);
+    fclose(f);
+
+    /*std::string str;
     for (VirtualMachine_NC_BYTE::ASM_Instruction instr : compiledNCASM) {
         str += std::to_string((int)instr.Command);
         if (instr.val1 != nullptr)
@@ -151,7 +217,9 @@ void Compiler_NCASM_to_ByteCode::saveCompiledProgram_to_file(std::string FileNam
     {
         out << str;
     }
-    out.close();
+    out.close();*/
+
+
 }
 
 int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,

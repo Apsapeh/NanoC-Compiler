@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 /*
  * 1 - allocate memory                      (adr) (size)
@@ -38,8 +39,8 @@
  * 51 - set val as new
 */
 
-//typedef uint64_t u_int64_t;
-//typedef uint16_t u_int16_t;
+typedef uint64_t u_int64_t;
+typedef uint16_t u_int16_t;
 
 class VirtualMachine_NC_BYTE {
 public:

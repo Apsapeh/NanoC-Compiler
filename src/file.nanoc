@@ -1,62 +1,13 @@
-// Без строк
-/*Cumment*/
+int a = 0;
+int b = 10;
 
-#define true 1 // Чтобы VSC не ругалась на ошибки
+while (a < b) {
+   if (a < 5) {
+       print(a);
+   } else {
+       int tmp = b - a;
+       print(tmp);
+   }
 
-int num = 0;
-int num2 = 10000;
-
-while (num < num2) {
-    int r = 0;
-    if (num != 0)
-    {
-        r = num2 / num;
-    }
-    print(r);
-    num = num + 50;
-
-    if (r == 1)
-    {
-        break;
-    }
+   a = a + 1;
 }
-
-//num4 = 3 + 2 + 1;
-
-/*int ass(int num)
-{
-	int a = num;
-	return(a);
-}
-
-int main(int a int n)
-{
-	int num1 = 5 + 3 + (2 - 1);
-	int num2 = num1;
-	int num3 = num1 + num2 + num3;
-    ass(0, 14 + 55);
-
-    eee(0, 0, eee(0));
-
-	if (num1 < 3) {
-        int num4 = ass(1);
-    }
-	else{int a = 3;}
-
-	int num4 = 0;
-    int num9 = 0;
-	while (true)
-	{
-		if(num4 == 12345)
-		{
-			break();
-		}
-		else
-		{
-			num9 = num4 + 1;
-		}
-	}
-
-    num4 = 3 + 2 + 0 or 1;
-}*/
-

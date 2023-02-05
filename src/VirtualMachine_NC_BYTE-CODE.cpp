@@ -143,9 +143,9 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
                     *(int64_t*)registers[*(u_int64_t*)inst->val2] = 0;
                 break;
             case 25: {
-                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val1] and
-                        *(u_int64_t *) registers[*(u_int64_t *) inst->val2])
-                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 1;
+                if (*(u_int64_t*) registers[*(u_int64_t *) inst->val1] and
+                        *(u_int64_t*) registers[*(u_int64_t *) inst->val2])
+                    *(u_int64_t*) registers[*(u_int64_t *) inst->val2] = 1;
                 else
                     *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 0;
                 break;

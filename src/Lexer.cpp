@@ -578,7 +578,7 @@ Lexer::Lexer(std::string sourceCode)
         TokensInfo.push_back(tempVecTokInfo);
     }
 
-    /*for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
+    for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
     {
         std::cout << n1 << " -- ";
         for (uint64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
@@ -588,7 +588,7 @@ Lexer::Lexer(std::string sourceCode)
                 std::cout << TokensInfo[n1][n2] << " ";
         }
         std::cout << "\n";
-    }*/
+    }
     //std::cout << this->lexedString << std::endl;
 
 }
