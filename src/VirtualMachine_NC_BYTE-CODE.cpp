@@ -1,4 +1,3 @@
-//#include <malloc.h>
 #include <iostream>
 #include <map>
 #include "VirtualMachine_NC_BYTE-CODE.h"
