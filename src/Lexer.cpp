@@ -131,7 +131,6 @@ Lexer::Lexer(std::string sourceCode)
         }
     }
 
-
     // Лексинг строк
     bool is_function_definition = false;
     int is_function_call = 0;
@@ -221,6 +220,9 @@ Lexer::Lexer(std::string sourceCode)
             else if (exp_string == "break")
                 ADD_TOKEN_TO_TMPVEC("BREAK", "~~~");
 
+            else if (exp_string == "#define") {
+
+            }
 
             else if (exp_string == "if")
             {

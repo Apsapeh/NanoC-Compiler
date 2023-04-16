@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "main.h"
+#include "PreProcessor.h"
 #include "Lexer.h"
 #include "Parser.h"
 #include "Compiler_to_NCASM.h"
@@ -89,9 +90,9 @@ int main(int argc, char *argv[])
     }
 
     //std::vector
-
-    Lexer lexer(source_code);
-    Parser parser(lexer.getTokenizedSource(), lexer.getTokensInfo());
+    PreProcessor preProcessor(source_code);
+    //Lexer lexer(source_code);
+    //Parser parser(lexer.getTokenizedSource(), lexer.getTokensInfo());
     //Compiler_to_NCASM comp_to_ncasm(parser.getParsedProgram());
     //Compiler_NCASM_to_ByteCode comp_ncasm_to_byte(comp_to_ncasm.getCompiledCode());
     //comp_ncasm_to_byte.saveCompiledProgram_to_file("asm.asm");

@@ -1,6 +1,21 @@
-int a = 0;
-int b = 10;
+/*int a = 0;
+int b = 10;*/
+#include "lib.nanoc"
 
+#define TEST(A, B) A + 15 + 32 + B
+#define true false
+#define test "ENTOHNTSUHEORHUNOTHUH"
+//TEST(12, 13);
+int a = TEST(1, 2);
+#define test "Hello"
+test;
+/*char* c = "Hello, my name \
+Tofik";
+
+int num(int a) {
+    print(a);
+}
+test;
 while (a < b) {
    if (a < 5) {
        print(a);
@@ -10,4 +25,4 @@ while (a < b) {
    }
 
    a = a + 1;
-}
+}*/

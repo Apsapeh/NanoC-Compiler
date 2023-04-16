@@ -31,8 +31,6 @@ void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
     }
     else if (node->Type == "ASSIGN")
     {
-        new_parrent_type == ASSIGN;
-
         if (node->kind[1]->Type == "VALUE") {
             addInstrToCompiledCode("LOAD", node->kind[0]->Info, "tmp_r0");
             addInstrToCompiledCode("SET", node->kind[1]->Info, "tmp_r0");
