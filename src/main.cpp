@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    //std::vector
     PreProcessor preProcessor(source_code);
     //Lexer lexer(source_code);
     //Parser parser(lexer.getTokenizedSource(), lexer.getTokensInfo());
