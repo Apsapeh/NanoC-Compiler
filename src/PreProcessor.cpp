@@ -4,52 +4,16 @@
 #include "Error.h"
 #include "PreProcessor.h"
 
-std::vector<std::string> PreProcessor::req(std::vector<std::string> &line, uint32_t start_pose, std::vector<DefineStruct> *defines) {
-    std::vector<std::string> result;
-    for (u_int32_t word_index = start_pose; word_index < line.size(); ++word_index) {
-        std::string word = line[word_index];
-        int64_t defineIndex = getDefineIndex(word, defines);
-
-        if (defineIndex != -1) {
-            if (word_index < line.size() and line[word_index+1] == "(") {
-                word_index += 2;
-                uint32_t slice_size = 2;
-                u_int32_t rb_br_counter = 1;
-                while (word_index < line.size()) {
-                    if (line[word_index] == "(")
-                        ++rb_br_counter;
-                    else if (line[word_index] == ")")
-                        --rb_br_counter;
-
-                    ++word_index;
-                    ++slice_size;
-
-                    if (rb_br_counter == 0)
-                        break;
-
-                }
-                std::vector<std::string> tmp_vec(line.begin()+word_index-slice_size, line.begin()+word_index);
-                req(tmp_vec, 0, defines);
-            }
-        }
-        else {
-            result.push_back(word);
-        }
-    }
-
-    return result;
-}
 
 PreProcessor::PreProcessor(std::string source) {
     std::vector<std::string> separated_source;
 
-    // Деление строки по новой стркоке
+    // Деление строки по новой строке
     std::string tmpStr = "";
     char prevCh = ' ';
     bool is_string = false;
     bool is_comment = false;
     u_int32_t multiline_comment_counter = 0;
-
     for (u_int32_t char_counter = 0; char_counter < source.size(); ++char_counter) {
         char &ch = source[char_counter];
 
@@ -99,7 +63,7 @@ PreProcessor::PreProcessor(std::string source) {
             if (ch == '"')
                 is_string = not is_string;
 
-            if ((ch == ' ' or ch == '(' or ch == ')' or ch == ';' or ch == ',' /*or ch == '{' or ch == '}'*/) and not is_string) {
+            if ((ch == ' ' or ch == '(' or ch == ')' or ch == ';' or ch == ',' or ch == '{' or ch == '}') and not is_string) {
 
                 if (not tmpStr.empty()) {
                     tmpVec.push_back(tmpStr);
@@ -110,7 +74,7 @@ PreProcessor::PreProcessor(std::string source) {
                     tmpVec.push_back("_");
                 }
 
-                if (ch == '(' or ch == ')' or ch == ';' or ch == ',') {
+                if (ch == '(' or ch == ')' or ch == ';' or ch == ',' or ch == '{' or ch == '}') {
                     tmpStr.push_back(ch);
                     tmpVec.push_back(tmpStr);
                     tmpStr.clear();
@@ -131,12 +95,13 @@ PreProcessor::PreProcessor(std::string source) {
     std::vector<std::string> resultVec;
     resultVec.reserve(separated_line.size() * 30);
     std::vector<DefineStruct> defines;
-    for (std::vector<std::string> &line : separated_line) {
+    for (u_int64_t lineIndex = 0; lineIndex < separated_line.size(); ++lineIndex) {
+        std::vector<std::string> &line = separated_line[lineIndex];
         if (line[0] == "#define") {
             std::string name = line[1];
             std::vector<std::string> args, body;
             bool is_args = false;
-            for (uint32_t wordIndex = 2; wordIndex < line.size(); ++wordIndex) {
+            for (u_int32_t wordIndex = 2; wordIndex < line.size(); ++wordIndex) {
                 std::string &word = line[wordIndex];
                 if (word == "_") {
                     is_args = true;
@@ -150,8 +115,15 @@ PreProcessor::PreProcessor(std::string source) {
                     else if (word == ")")
                         is_args = false;
                 }
-                else
-                    body.push_back(word);
+                else {
+                    int64_t defIndex = getDefineIndex(word, &defines);
+                    if (defIndex != -1) {
+                        std::vector<std::string> res = parseDefineString(line, wordIndex, defines[defIndex]);
+                        body.insert(body.end(), res.begin(), res.end());
+                    }
+                    else
+                        body.push_back(word);
+                }
             }
             int64_t defIndex = getDefineIndex(name, &defines);
             if (defIndex == -1)
@@ -161,6 +133,7 @@ PreProcessor::PreProcessor(std::string source) {
                 defines[defIndex].Body = body;
             }
         }
+
         else if (line[0] == "#undef") {
             if (line.size() < 2)
                 Error::throwError("You did not specify a macro name");
@@ -173,40 +146,37 @@ PreProcessor::PreProcessor(std::string source) {
 
             defines.erase(defines.begin() + def_index);
         }
+
+        else if (line[0] == "#ifdef" or line[0] == "#ifndef") {
+            if (line.size() < 2)
+                Error::throwError("You did not specify a macro name");
+            else if (line.size() > 2)
+                Error::throwError("Too many parameters are specified for the #undef directive");
+
+            int64_t def_index = getDefineIndex(line[1], &defines);
+            if ((line[0] == "#ifdef" and def_index == -1) or (line[0] == "#ifndef" and def_index != -1)) {
+                while (lineIndex < separated_line.size()) {
+                    if (separated_line[lineIndex][0] == "#endif")
+                        break;
+                    else
+                        ++lineIndex;
+                }
+            }
+        }
+
+        else if (line[0] == "#endif")
+            continue;
+
         else {
-            for (uint32_t wordIndex = 0; wordIndex < line.size(); ++wordIndex) {
+            for (u_int32_t wordIndex = 0; wordIndex < line.size(); ++wordIndex) {
                 std::string &word = line[wordIndex];
                 int64_t defIndex = getDefineIndex(word, &defines);
 
                 if (defIndex == -1)
                     resultVec.push_back(word);
                 else {
-                    if (wordIndex+1 < line.size() and line[wordIndex+1] == "(") {
-                        wordIndex += 2;
-                        uint32_t rb_br_counter = 1;
-                        std::vector<std::string> tmpVec;
-                        while (wordIndex < line.size()) {
-                            if (line[wordIndex] == "(")
-                                ++rb_br_counter;
-                            else if (line[wordIndex] == ")")
-                                --rb_br_counter;
-                            ++wordIndex;
-
-                            if (rb_br_counter == 0)
-                                break;
-
-                            tmpVec.push_back(line[wordIndex - 1]);
-                        }
-                        --wordIndex;
-
-                        std::vector<std::string> res = changeDefineToString(defines[defIndex], tmpVec);
-                        resultVec.insert(resultVec.end(), res.begin(), res.end());
-                    }
-                    else {
-                        std::vector<std::string> tmp_vec;
-                        std::vector<std::string> res = changeDefineToString(defines[defIndex], tmp_vec);
-                        resultVec.insert(resultVec.end(), res.begin(), res.end());
-                    }
+                    std::vector<std::string> res = parseDefineString(line, wordIndex, defines[defIndex]);
+                    resultVec.insert(resultVec.end(), res.begin(), res.end());
                 }
             }
         }
@@ -220,48 +190,41 @@ PreProcessor::PreProcessor(std::string source) {
 
 }
 
-void PreProcessor::AddDefine(
-        std::string &word, std::vector<DefineStruct> &defines,  u_int32_t &define_index, u_int32_t &local_rbrac_counter,
-        std::vector<std::string> &tmp_vec_for_args, std::vector<std::string> &vec_to_push_result
-) {
-    if (define_index == -1) {
-        define_index = getDefineIndex(word, &defines);
-        local_rbrac_counter = 0;
-    }
-    if (define_index != -1) {
-        if (defines[define_index].Args.empty()) {
-            vec_to_push_result.insert(vec_to_push_result.end(), defines[define_index].Body.begin(), defines[define_index].Body.end());
-        }
-        else {
-            if (word == "(") {
-                ++local_rbrac_counter;
-            };
-            if (word == ")") {
-                --local_rbrac_counter;
-            };
 
-            if (local_rbrac_counter == 0) {
-                if (not tmp_vec_for_args.empty()) {
-                    changeDefineToString(defines[define_index], tmp_vec_for_args);
-                    define_index = -1;
-                }
-            }
-            else {
-                tmp_vec_for_args.push_back(word);
-            }
+std::vector<std::string> PreProcessor::parseDefineString(std::vector<std::string> &line, u_int32_t &wordIndex, DefineStruct defineData) {
+    if (wordIndex+1 < line.size() and line[wordIndex+1] == "(") {
+        wordIndex += 2;
+        u_int32_t rb_br_counter = 1;
+        std::vector<std::string> tmpVec;
+        while (wordIndex < line.size()) {
+            if (line[wordIndex] == "(")
+                ++rb_br_counter;
+            else if (line[wordIndex] == ")")
+                --rb_br_counter;
+            ++wordIndex;
+
+            if (rb_br_counter == 0)
+                break;
+
+            tmpVec.push_back(line[wordIndex - 1]);
         }
+        --wordIndex;
+
+        return changeDefineToString(defineData, tmpVec);
     }
     else {
-        vec_to_push_result.push_back(word);
+        std::vector<std::string> tmp_vec;
+        return changeDefineToString(defineData, tmp_vec);
     }
 }
+
 
 std::vector<std::string> PreProcessor::changeDefineToString(PreProcessor::DefineStruct def_data, std::vector<std::string> &args_line) {
 
     std::vector<std::vector<std::string>> args;
-    uint32_t rb_counter = 0;
+    u_int32_t rb_counter = 0;
     std::vector<std::string> tmp_arg;
-    for (uint32_t word_index = 0; word_index < args_line.size(); ++word_index) {
+    for (u_int32_t word_index = 0; word_index < args_line.size(); ++word_index) {
         std::string &word = args_line[word_index];
 
         if (rb_counter == 0 and word == ",") {
@@ -299,7 +262,6 @@ std::vector<std::string> PreProcessor::changeDefineToString(PreProcessor::Define
             result.push_back(word);
     }
 
-
     return result;
 }
 
@@ -310,3 +272,5 @@ int64_t PreProcessor::getDefineIndex(std::string str, std::vector<DefineStruct> 
     }
     return (int64_t)-1;
 }
+
+

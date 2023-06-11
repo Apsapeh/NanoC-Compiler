@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         int difference = number_of_brackets["figure_st"] - number_of_brackets["figure_end"];
         char miss_char = difference > 0  ?  '}'  :  '{';
         
-        for (uint32_t num = 0; num < abs(difference); ++num)
+        for (u_int32_t num = 0; num < abs(difference); ++num)
             std::cout << "Syntax error: character `" << miss_char << "` not found" << std::endl;
         
         return -1;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
         int difference = number_of_brackets["round_st"] - number_of_brackets["round_end"];
         char miss_char = difference > 0  ?  ')'  :  '(';
         
-        for (uint32_t num = 0; num < abs(difference); ++num)
+        for (u_int32_t num = 0; num < abs(difference); ++num)
             std::cout << "Syntax error: character `" << miss_char << "` not found" << std::endl;
         
         return -1;

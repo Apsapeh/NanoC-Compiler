@@ -4,10 +4,6 @@
 #include <vector>
 #include <map>
 
-typedef uint64_t u_int64_t;
-typedef uint32_t u_int32_t;
-typedef uint16_t u_int16_t;
-typedef uint8_t u_int8_t;
 
 class Compiler_to_NCASM {
 public:
@@ -27,7 +23,7 @@ public:
 private:
     std::map<std::string, u_int64_t> variablesBinds;
     std::vector<NCASM_Instruction> CompiledCode;
-    void recursionNodeParse(Parser::Node *node, uint64_t &k_c,
+    void recursionNodeParse(Parser::Node *node, u_int64_t &k_c,
                                    nodeType type_of_parrent, NCASM_Instruction *temp_instr = nullptr);
     void recursionMathExpCompiler(Parser::Node *node, int64_t num, bool is_logical = false);
 

@@ -1,7 +1,7 @@
 #include "Parser.h"
 typedef Parser::Node Node;
 
-static void recursionNodePrint (Node *node, uint32_t &n_c);
+static void recursionNodePrint (Node *node, u_int32_t &n_c);
 
 
 Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
@@ -12,11 +12,11 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
 
     //Node *tempN;
     std::string tmp_string = "";
-    for (uint32_t line_num=0; line_num < TokenizedSource.size(); ++line_num)
+    for (u_int32_t line_num=0; line_num < TokenizedSource.size(); ++line_num)
     {
         std::vector<std::string> &VecLine = TokenizedSource[line_num];
         std::vector<std::string> &VecLineInfo = TokensInfo[line_num];
-        for (uint32_t token_num=0; token_num < VecLine.size(); ++token_num)
+        for (u_int32_t token_num=0; token_num < VecLine.size(); ++token_num)
         {
             std::string &Token = VecLine[token_num];
             std::string &Info = VecLineInfo[token_num];
@@ -28,7 +28,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
                 if (Token == "FN_CALL") {
                     int count_of_argsBr = 1;
                     int fn_call_start = token_num+2;
-                    for (uint32_t i = token_num + 2; i < VecLine.size(); ++i) {
+                    for (u_int32_t i = token_num + 2; i < VecLine.size(); ++i) {
                         if (VecLine[i] == "ARGS_BEGIN") {
                             //fn_call_start = i + 1;
                             ++count_of_argsBr;
@@ -73,7 +73,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
                 if (token_num > 0 and (*(&Token-1) == "IF" or *(&Token-1) == "WHILE")) {
                     int count_of_argsBr = 1;
                     int fn_call_start = token_num+1;
-                    for (uint32_t i = token_num + 1; i < VecLine.size(); ++i) {
+                    for (u_int32_t i = token_num + 1; i < VecLine.size(); ++i) {
                         if (VecLine[i] == "COND_BEGIN")
                             ++count_of_argsBr;
                         else if (VecLine[i] == "COND_END")
@@ -154,7 +154,7 @@ Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
         }
     }
     ParsedProgram = Program;
-    uint32_t kind_counter = 0;
+    u_int32_t kind_counter = 0;
     recursionNodePrint(Program, kind_counter);
 }
 
@@ -203,7 +203,7 @@ Node* Parser::recursionFuncParser(std::vector<std::string> expression, std::vect
 
     std::vector<std::string> temp_vec;
     std::vector<std::string> temp_vec2;
-    for (uint32_t token_num=0; token_num < expression.size(); ++token_num)
+    for (u_int32_t token_num=0; token_num < expression.size(); ++token_num)
     {
         if (expression[token_num] == "SEPARATOR") {
             exps.push_back(temp_vec);
@@ -220,7 +220,7 @@ Node* Parser::recursionFuncParser(std::vector<std::string> expression, std::vect
     exps.push_back(temp_vec);
     exps_info.push_back(temp_vec2);
 
-    for (uint32_t token_num=0; token_num < exps.size(); ++token_num)
+    for (u_int32_t token_num=0; token_num < exps.size(); ++token_num)
     {
         std::vector<std::string> &exp = exps[token_num];
         std::vector<std::string> &exp_info = exps_info[token_num];
@@ -328,7 +328,7 @@ Node* Parser::recursionMathParser(std::vector<std::string> expression, std::vect
             if (expression[token_num] == "FN_CALL") {
                 int count_of_argsBr = 0;
                 int fn_call_start   = token_num+2;
-                for (uint32_t i = token_num+1; i < expression.size(); ++i) {
+                for (u_int32_t i = token_num+1; i < expression.size(); ++i) {
                     if (expression[i] == "ARGS_BEGIN")
                         ++count_of_argsBr;
 
@@ -352,7 +352,7 @@ Node* Parser::recursionMathParser(std::vector<std::string> expression, std::vect
 }
 
 
-static void recursionNodePrint(Node *node, uint32_t &k_c)
+static void recursionNodePrint(Node *node, u_int32_t &k_c)
 {
     std::cout << std::string(k_c, '\t') << node->Type << " (" << node->Info << ")" << std::endl;
     ++k_c;

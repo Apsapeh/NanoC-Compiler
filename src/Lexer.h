@@ -5,11 +5,6 @@
 #include <map>
 //std::map <std::string, std::string> SYMBOLS = {{"==", "sdf"}};
 
-typedef uint64_t u_int64_t;
-typedef uint32_t u_int32_t;
-typedef uint16_t u_int16_t;
-typedef uint8_t u_int8_t;
-
 class Lexer{
 private:
     //std::string lexedString = "";

@@ -6,10 +6,6 @@
 #include <map>
 #include <string>
 
-typedef uint64_t u_int64_t;
-typedef uint32_t u_int32_t;
-typedef uint16_t u_int16_t;
-typedef uint8_t u_int8_t;
 
 class Compiler_NCASM_to_ByteCode {
 private:

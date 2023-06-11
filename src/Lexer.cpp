@@ -121,7 +121,7 @@ Lexer::Lexer(std::string sourceCode)
 
     // Простейший препроцессинг
     for (std::vector <std::string> &splitted : separated_sourceCodeString) {
-        for (uint32_t str_num = 0; str_num < splitted.size(); ++str_num) {
+        for (u_int32_t str_num = 0; str_num < splitted.size(); ++str_num) {
             if (splitted[str_num] == "true") {
                 splitted[str_num] = "1";
             }
@@ -135,7 +135,7 @@ Lexer::Lexer(std::string sourceCode)
     bool is_function_definition = false;
     int is_function_call = 0;
     bool is_args = false;
-    uint64_t string_num = 0;
+    u_int64_t string_num = 0;
     for (std::vector <std::string> &splitted : separated_sourceCodeString)
     {
         bool second_exp_part = false;
@@ -147,7 +147,7 @@ Lexer::Lexer(std::string sourceCode)
 
         ++string_num;
         Expression temp_expression;
-        for (uint32_t str_num = 0; str_num < splitted.size(); ++str_num)
+        for (u_int32_t str_num = 0; str_num < splitted.size(); ++str_num)
         {
             std::string exp_string = splitted[str_num];
             if (exp_string == "(") {
@@ -220,9 +220,6 @@ Lexer::Lexer(std::string sourceCode)
             else if (exp_string == "break")
                 ADD_TOKEN_TO_TMPVEC("BREAK", "~~~");
 
-            else if (exp_string == "#define") {
-
-            }
 
             else if (exp_string == "if")
             {
@@ -365,10 +362,10 @@ Lexer::Lexer(std::string sourceCode)
         TokensInfo.push_back(tempVecTokInfo);
     }
 
-    for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
+    for (u_int64_t n1=0; n1 < TokenizedSource.size(); ++n1)
     {
         std::cout << n1 << " -- ";
-        for (uint64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
+        for (u_int64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
         {
             std::cout << TokenizedSource[n1][n2] << " ";
             if (TokensInfo[n1][n2] != "~~~")

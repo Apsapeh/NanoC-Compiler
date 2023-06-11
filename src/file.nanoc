@@ -5,10 +5,29 @@ int b = 10;*/
 #define TEST(A, B) A + 15 + 32 + B
 #define true false
 #define test "ENTOHNTSUHEORHUNOTHUH"
-//TEST(12, 13);
+
+
+#define deep1(a) a
+#define deep2(a, c) deep1(a) + c
+#define deep3(b, d, n) deep2(b, d) + n
+
+#ifdef TEST
+deep3(10, 45, 153)
+
+int main() {
+    print("Hello, world");
+}
+#endif
+
+
+/*//TEST(12, k13);
 int a = TEST(1, 2);
 #define test "Hello"
-test;
+t/*es*/t;
+
+int main() {test
+
+}*/
 /*char* c = "Hello, my name \
 Tofik";
 
