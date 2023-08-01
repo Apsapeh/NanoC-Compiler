@@ -3,6 +3,7 @@
 #include "Parser.h"
 #include <vector>
 #include <map>
+#include <cstdint>
 
 
 class Compiler_to_NCASM {
@@ -21,9 +22,9 @@ public:
     Compiler_to_NCASM(Parser::Node* node);
     std::vector<NCASM_Instruction>* getCompiledCode();
 private:
-    std::map<std::string, u_int64_t> variablesBinds;
+    std::map<std::string, uint64_t> variablesBinds;
     std::vector<NCASM_Instruction> CompiledCode;
-    void recursionNodeParse(Parser::Node *node, u_int64_t &k_c,
+    void recursionNodeParse(Parser::Node *node, uint64_t &k_c,
                                    nodeType type_of_parrent, NCASM_Instruction *temp_instr = nullptr);
     void recursionMathExpCompiler(Parser::Node *node, int64_t num, bool is_logical = false);
 

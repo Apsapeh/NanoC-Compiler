@@ -3,13 +3,13 @@
 #include <stdlib.h>
 
 int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,
-                    u_int64_t start_pose, std::string el_to_find);
+                    uint64_t start_pose, std::string el_to_find);
 
 Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code) {
-    std::map<std::string, u_int64_t> vars_heap_binds;
-    u_int64_t heap_size = 0;
+    std::map<std::string, uint64_t> vars_heap_binds;
+    uint64_t heap_size = 0;
 
-    u_int64_t num = 0;
+    uint64_t num = 0;
     for (Compiler_to_NCASM::NCASM_Instruction instr : *ncasm_code)
     {
         std::string OPCode = instr.OPcode;
@@ -101,7 +101,7 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
         ++num;
     }
 
-    u_int64_t num5 = 0;
+    uint64_t num5 = 0;
     for (VirtualMachine_NC_BYTE::ASM_Instruction instr : compiledNCASM) {
         std::cout << num5 << " --- " << (int)instr.Command;
         if (instr.val1 != nullptr)
@@ -113,8 +113,8 @@ Compiler_NCASM_to_ByteCode::Compiler_NCASM_to_ByteCode(std::vector<Compiler_to_N
     }
 }
 
-void Compiler_NCASM_to_ByteCode::addInstrToCompiledCode(u_int8_t OPCode, u_int64_t v1_size, int64_t v1_data,
-                                                        u_int64_t v2_size, int64_t v2_data) {
+void Compiler_NCASM_to_ByteCode::addInstrToCompiledCode(uint8_t OPCode, uint64_t v1_size, int64_t v1_data,
+                                                        uint64_t v2_size, int64_t v2_data) {
     VirtualMachine_NC_BYTE::ASM_Instruction temp;
     temp.Command = OPCode;
     if (v1_size != 0)
@@ -223,13 +223,13 @@ void Compiler_NCASM_to_ByteCode::saveCompiledProgram_to_file(std::string FileNam
 }
 
 int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_code,
-                    u_int64_t start_pose, std::string el_to_find)
+                    uint64_t start_pose, std::string el_to_find)
 {
-    u_int64_t count_of_bad = 1;
-    u_int64_t count_of_labels = 0;
+    uint64_t count_of_bad = 1;
+    uint64_t count_of_labels = 0;
 
     if (el_to_find == "ELSE_BEGIN" or el_to_find == "ELSE_END" or el_to_find == "WHILE_END") {
-        for (u_int64_t index = start_pose; index < ncasm_code->size(), ++index;) {
+        for (uint64_t index = start_pose; index < ncasm_code->size(), ++index;) {
             if ((*ncasm_code)[index].OPcode == "IF_BEGIN" or (*ncasm_code)[index].OPcode == "ELSE_BEGIN" or
                 (*ncasm_code)[index].OPcode == "ELSE_END" or (*ncasm_code)[index].OPcode == "WHILE_BEGIN" or
                 (*ncasm_code)[index].OPcode == "WHILE_END")
@@ -255,7 +255,7 @@ int64_t getJMP_Size(std::vector<Compiler_to_NCASM::NCASM_Instruction>* ncasm_cod
         }
     }
     else if (el_to_find == "WHILE_BEGIN") {
-        for (u_int64_t index = start_pose; index > 0, --index;) {
+        for (uint64_t index = start_pose; index > 0, --index;) {
             if ((*ncasm_code)[index].OPcode == "IF_BEGIN" or (*ncasm_code)[index].OPcode == "ELSE_BEGIN" or
                 (*ncasm_code)[index].OPcode == "ELSE_END" or (*ncasm_code)[index].OPcode == "WHILE_BEGIN" or
                 (*ncasm_code)[index].OPcode == "WHILE_END")

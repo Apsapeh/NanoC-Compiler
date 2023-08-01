@@ -2,8 +2,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-class Parser {
+#include <cstdint>
 
+class Parser {
 public:
     struct Node
     {
@@ -24,7 +25,7 @@ private:
 
     Node* recursionMathParser(
         std::vector<std::string> expression, std::vector<std::string> expression_info,
-        Node *mother_node, std::string lmore = "", u_int32_t lmore_index = 0
+        Node *mother_node, std::string lmore = "", uint32_t lmore_index = 0
     );
     Node* recursionFuncParser(
         std::vector<std::string> expression, std::vector<std::string> expression_info , std::string name

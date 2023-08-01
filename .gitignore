@@ -1,0 +1,6 @@
+build/
+.xmake/
+cmake-build-debug/
+asm.asm
+nc
+CMakeLists.txt

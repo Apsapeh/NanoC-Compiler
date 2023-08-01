@@ -13,8 +13,8 @@ PreProcessor::PreProcessor(std::string source) {
     char prevCh = ' ';
     bool is_string = false;
     bool is_comment = false;
-    u_int32_t multiline_comment_counter = 0;
-    for (u_int32_t char_counter = 0; char_counter < source.size(); ++char_counter) {
+    uint32_t multiline_comment_counter = 0;
+    for (uint32_t char_counter = 0; char_counter < source.size(); ++char_counter) {
         char &ch = source[char_counter];
 
         if (ch == '"')
@@ -54,17 +54,22 @@ PreProcessor::PreProcessor(std::string source) {
 
 
     // Делим строку на слова
+    char sep_by_ch[] = {
+            '(', ')', '[', ']', ';', ',',
+            '{', '}', '=', '+', '-', '*',
+            '/', '%'
+    };
     std::vector<std::vector<std::string>> separated_line;
     for (std::string str : separated_source) {
         bool is_string = false;
         std::vector<std::string> tmpVec;
         tmpStr.clear();
-        for (char &ch : str) {
+        for (uint64_t i = 0; i < str.size(); ++i) {
+            char &ch = str[i];
             if (ch == '"')
                 is_string = not is_string;
 
-            if ((ch == ' ' or ch == '(' or ch == ')' or ch == ';' or ch == ',' or ch == '{' or ch == '}') and not is_string) {
-
+            if ((ch == ' ' or std::find(std::begin(sep_by_ch), std::end(sep_by_ch), ch) != std::end(sep_by_ch)) and not is_string) {
                 if (not tmpStr.empty()) {
                     tmpVec.push_back(tmpStr);
                     tmpStr.clear();
@@ -74,8 +79,14 @@ PreProcessor::PreProcessor(std::string source) {
                     tmpVec.push_back("_");
                 }
 
-                if (ch == '(' or ch == ')' or ch == ';' or ch == ',' or ch == '{' or ch == '}') {
+                if (std::find(std::begin(sep_by_ch), std::end(sep_by_ch), ch) != std::end(sep_by_ch)) {
                     tmpStr.push_back(ch);
+                    if (i+1 < str.size() and str[i+1] == '=' and
+                        (ch == '+' or ch == '-' or ch == '*' or ch == '/' or ch == '%' or ch == '=')
+                    ) {
+                        tmpStr.push_back('=');
+                        ++i;
+                    }
                     tmpVec.push_back(tmpStr);
                     tmpStr.clear();
                 }
@@ -92,16 +103,22 @@ PreProcessor::PreProcessor(std::string source) {
     separated_source = std::vector<std::string>();
 
 
+    std::vector<DefineStruct> defines = {
+            {"true" , {}, {"1"}},
+            {"false", {}, {"0"}},
+    };
     std::vector<std::string> resultVec;
     resultVec.reserve(separated_line.size() * 30);
-    std::vector<DefineStruct> defines;
-    for (u_int64_t lineIndex = 0; lineIndex < separated_line.size(); ++lineIndex) {
+    for (uint64_t lineIndex = 0; lineIndex < separated_line.size(); ++lineIndex) {
         std::vector<std::string> &line = separated_line[lineIndex];
-        if (line[0] == "#define") {
+        if (line[0] == "#include") {
+            // TODO: Add #include
+        }
+        else if (line[0] == "#define") {
             std::string name = line[1];
             std::vector<std::string> args, body;
             bool is_args = false;
-            for (u_int32_t wordIndex = 2; wordIndex < line.size(); ++wordIndex) {
+            for (uint32_t wordIndex = 2; wordIndex < line.size(); ++wordIndex) {
                 std::string &word = line[wordIndex];
                 if (word == "_") {
                     is_args = true;
@@ -168,7 +185,7 @@ PreProcessor::PreProcessor(std::string source) {
             continue;
 
         else {
-            for (u_int32_t wordIndex = 0; wordIndex < line.size(); ++wordIndex) {
+            for (uint32_t wordIndex = 0; wordIndex < line.size(); ++wordIndex) {
                 std::string &word = line[wordIndex];
                 int64_t defIndex = getDefineIndex(word, &defines);
 
@@ -181,20 +198,20 @@ PreProcessor::PreProcessor(std::string source) {
             }
         }
     }
-    separated_line = std::vector<std::vector<std::string>>();
 
     resultVec.shrink_to_fit();
     for (std::string str : resultVec) {
         std::cout << str << " ";
     }
-
+    std::cout << "\n";
+    ProcessedSource = resultVec;
 }
 
 
-std::vector<std::string> PreProcessor::parseDefineString(std::vector<std::string> &line, u_int32_t &wordIndex, DefineStruct defineData) {
+std::vector<std::string> PreProcessor::parseDefineString(std::vector<std::string> &line, uint32_t &wordIndex, DefineStruct defineData) {
     if (wordIndex+1 < line.size() and line[wordIndex+1] == "(") {
         wordIndex += 2;
-        u_int32_t rb_br_counter = 1;
+        uint32_t rb_br_counter = 1;
         std::vector<std::string> tmpVec;
         while (wordIndex < line.size()) {
             if (line[wordIndex] == "(")
@@ -222,9 +239,9 @@ std::vector<std::string> PreProcessor::parseDefineString(std::vector<std::string
 std::vector<std::string> PreProcessor::changeDefineToString(PreProcessor::DefineStruct def_data, std::vector<std::string> &args_line) {
 
     std::vector<std::vector<std::string>> args;
-    u_int32_t rb_counter = 0;
+    uint32_t rb_counter = 0;
     std::vector<std::string> tmp_arg;
-    for (u_int32_t word_index = 0; word_index < args_line.size(); ++word_index) {
+    for (uint32_t word_index = 0; word_index < args_line.size(); ++word_index) {
         std::string &word = args_line[word_index];
 
         if (rb_counter == 0 and word == ",") {
@@ -272,5 +289,58 @@ int64_t PreProcessor::getDefineIndex(std::string str, std::vector<DefineStruct> 
     }
     return (int64_t)-1;
 }
+
+
+//////  PUBLIC:
+
+std::vector<std::string> PreProcessor::getProcessedSourceVec() {
+    return ProcessedSource;
+}
+
+std::string PreProcessor::getProcessedSourceStr() {
+    std::string result;
+    result.reserve(ProcessedSource.size() * 5);
+    for (std::string &str : ProcessedSource)
+        result += str + " ";
+    return result;
+}
+
+std::vector<std::vector<std::string>> PreProcessor::getProcessedSourceVecLines() {
+    std::vector <std::vector<std::string>> result;
+    std::vector<std::string> tmp_vec;
+    for (std::string &word : ProcessedSource) {
+        if (word == ";") {
+            if (not tmp_vec.empty()) {
+                result.push_back(tmp_vec);
+                tmp_vec.clear();
+            }
+        }
+        else if (word == "{" or word == "}") {
+            if (not tmp_vec.empty()) {
+            //    tmp_vec.push_back(word);
+                result.push_back(tmp_vec);
+                tmp_vec.clear();
+            }
+            result.push_back({word});
+        }
+        else {
+            tmp_vec.push_back(word);
+        }
+    }
+
+    if (not tmp_vec.empty())
+        result.push_back(tmp_vec);
+
+
+    for (auto a : result) {
+        for (auto b : a) {
+            std::cout << b << " ";
+        }
+        std::cout << "\n";
+    }
+
+    return result;
+}
+
 
 

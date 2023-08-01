@@ -4,7 +4,7 @@
 Compiler_to_NCASM::Compiler_to_NCASM(Parser::Node* node)
 {
 
-    u_int64_t kind_counter = 0;
+    uint64_t kind_counter = 0;
     recursionNodeParse(node, kind_counter, PROGRAM);
 
     for (NCASM_Instruction inst : CompiledCode) {
@@ -18,10 +18,10 @@ Compiler_to_NCASM::Compiler_to_NCASM(Parser::Node* node)
     }
 }
 
-void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, u_int64_t &k_c,
+void Compiler_to_NCASM::recursionNodeParse(Parser::Node *node, uint64_t &k_c,
                                            nodeType type_of_parrent, NCASM_Instruction *temp_instr)
 {
-    u_int64_t old_size = 0;
+    uint64_t old_size = 0;
     nodeType new_parrent_type = type_of_parrent;
     if (node->Type == "DEFINE_VAR")
     {

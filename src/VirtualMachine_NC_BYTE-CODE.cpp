@@ -8,15 +8,15 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
     void** dyn_stack = (void**)malloc(0);
     void** heap = (void**)malloc(0);
     heapNullChunk* heap_null_chunks_arr =  (heapNullChunk*) malloc(0);
-    std::map <u_int64_t, u_int64_t> heap_var;
+    std::map <uint64_t, uint64_t> heap_var;
 
     void* registers[6] {malloc(8), malloc(8), malloc(8),
                         malloc(8), malloc(8), malloc(8)};
 
-    u_int64_t dyn_stack_size = 0;
-    u_int64_t dyn_stack_relative_start = 0;
-    u_int64_t heap_size = 0;
-    u_int64_t heap_null_arr_size = 0;
+    uint64_t dyn_stack_size = 0;
+    uint64_t dyn_stack_relative_start = 0;
+    uint64_t heap_size = 0;
+    uint64_t heap_null_arr_size = 0;
 
     ASM_Instruction *inst;
     for (unsigned long long num_of_instr = 0; num_of_instr < count_of_instrs; ++num_of_instr) {
@@ -28,21 +28,21 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
             case 1:
                 ++heap_size;
                 heap = (void **)realloc(heap, sizeof(void*) * heap_size);
-                heap[*(u_int64_t *)inst->val1] = malloc(*(u_int64_t*)inst->val2);
+                heap[*(uint64_t *)inst->val1] = malloc(*(uint64_t*)inst->val2);
                 break;
             case 2:
                 break;
             case 3: {
-                free(heap[*(u_int64_t *) inst->val1]);
-                heap[*(u_int64_t *) inst->val1] = nullptr;
-                u_int64_t index = binarySearchinHeapNull(heap_null_chunks_arr, heap_null_arr_size,
-                                                         *(u_int64_t *) inst->val1 / heap_null_chunk_size);
+                free(heap[*(uint64_t *) inst->val1]);
+                heap[*(uint64_t *) inst->val1] = nullptr;
+                uint64_t index = binarySearchinHeapNull(heap_null_chunks_arr, heap_null_arr_size,
+                                                         *(uint64_t *) inst->val1 / heap_null_chunk_size);
                 ++heap_null_arr_size;
                 if (!index) {
                     heap_null_chunks_arr = (heapNullChunk *) realloc(heap_null_chunks_arr,
                                                                      sizeof(heapNullChunk) * heap_null_arr_size);
                     index = heap_null_arr_size - 1;
-                    heap_null_chunks_arr[index].pos = *(u_int64_t *) inst->val1;
+                    heap_null_chunks_arr[index].pos = *(uint64_t *) inst->val1;
                 }
                 ++heap_null_chunks_arr[index].count;
                 break;
@@ -53,82 +53,82 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
             case 5:
                 ++dyn_stack_size;
                 dyn_stack = (void**)realloc(dyn_stack, sizeof(void*) * dyn_stack_size);
-                dyn_stack[dyn_stack_size-1] = malloc(*(u_int64_t*)inst->val1);
+                dyn_stack[dyn_stack_size-1] = malloc(*(uint64_t*)inst->val1);
                 break;
             case 6:
-                registers[*(u_int64_t*)inst->val2] = dyn_stack[dyn_stack_relative_start + *(u_int64_t*)inst->val1];
+                registers[*(uint64_t*)inst->val2] = dyn_stack[dyn_stack_relative_start + *(uint64_t*)inst->val1];
                 break;
             case 7: {
-                u_int64_t old_size = dyn_stack_size;
-                dyn_stack_size -= *(u_int64_t *) inst->val1 * sizeof(void *);
-                for (u_int64_t index = dyn_stack_size; index < old_size; ++index)
+                uint64_t old_size = dyn_stack_size;
+                dyn_stack_size -= *(uint64_t *) inst->val1 * sizeof(void *);
+                for (uint64_t index = dyn_stack_size; index < old_size; ++index)
                     free(dyn_stack[index]);
                 dyn_stack = (void **) realloc(dyn_stack, sizeof(void **) * dyn_stack_size);
                 break;
             }
 
             case 8:
-                *(int64_t*)registers[*(u_int64_t*)inst->val2] = *(int64_t*)registers[*(u_int64_t*)inst->val1];
+                *(int64_t*)registers[*(uint64_t*)inst->val2] = *(int64_t*)registers[*(uint64_t*)inst->val1];
                 break;
             case 9:
-                registers[*(u_int64_t*)inst->val2] = registers[*(u_int64_t*)inst->val1];
+                registers[*(uint64_t*)inst->val2] = registers[*(uint64_t*)inst->val1];
                 break;
             case 10:
-                *(int64_t*)registers[*(u_int64_t*)inst->val2] = *(int64_t*)inst->val1;
+                *(int64_t*)registers[*(uint64_t*)inst->val2] = *(int64_t*)inst->val1;
                 //free(inst->val1);
                 break;
 
             case 11:
-                *(int64_t*)registers[*(u_int64_t*)inst->val2] += *(int64_t*)registers[*(u_int64_t*)inst->val1];
+                *(int64_t*)registers[*(uint64_t*)inst->val2] += *(int64_t*)registers[*(uint64_t*)inst->val1];
                 break;
             case 12:
-                //std::cout << " -- " << *(int64_t*)registers[*(u_int64_t*)inst->val2] << " @@ " << *(int64_t*)registers[*(u_int64_t*)inst->val1] << std::endl;
-                *(int64_t*)registers[*(u_int64_t*)inst->val2] -= *(int64_t*)registers[*(u_int64_t*)inst->val1];
+                //std::cout << " -- " << *(int64_t*)registers[*(uint64_t*)inst->val2] << " @@ " << *(int64_t*)registers[*(uint64_t*)inst->val1] << std::endl;
+                *(int64_t*)registers[*(uint64_t*)inst->val2] -= *(int64_t*)registers[*(uint64_t*)inst->val1];
 
                 break;
             case 13:
-                *(int64_t*)registers[*(u_int64_t*)inst->val2] *= *(int64_t*)registers[*(u_int64_t*)inst->val1];
+                *(int64_t*)registers[*(uint64_t*)inst->val2] *= *(int64_t*)registers[*(uint64_t*)inst->val1];
                 break;
             case 14:
-                if (*(int64_t*)registers[*(u_int64_t*)inst->val1] == 0)
+                if (*(int64_t*)registers[*(uint64_t*)inst->val1] == 0)
                 {
                     std::cout << "Error: Zero Divide" << std::endl;
                     exit(1);
                 }
-                *(int64_t*)registers[*(u_int64_t*)inst->val2] /= *(int64_t*)registers[*(u_int64_t*)inst->val1];
+                *(int64_t*)registers[*(uint64_t*)inst->val2] /= *(int64_t*)registers[*(uint64_t*)inst->val1];
                 break;
 
             case 15:
-                if (*(int64_t*)registers[*(u_int64_t*)inst->val2] == 1)
+                if (*(int64_t*)registers[*(uint64_t*)inst->val2] == 1)
                     num_of_instr += *(int64_t*)inst->val1;
                 break;
             case 16:
-                if (*(int64_t*)registers[*(u_int64_t*)inst->val2] == 0)
+                if (*(int64_t*)registers[*(uint64_t*)inst->val2] == 0)
                     num_of_instr += *(int64_t*)inst->val1;
                 break;
             case 17:
-                if (*(int64_t*)registers[*(u_int64_t*)inst->val2] < 0)
+                if (*(int64_t*)registers[*(uint64_t*)inst->val2] < 0)
                     num_of_instr += *(int64_t*)inst->val1;
                 break;
             case 18:
-                if (*(int64_t*)registers[*(u_int64_t*)inst->val2] > 0)
+                if (*(int64_t*)registers[*(uint64_t*)inst->val2] > 0)
                     num_of_instr += *(int64_t *) inst->val1;
                 break;
             case 19:
-                if (*(int64_t *) registers[*(u_int64_t *) inst->val2] != 1)
+                if (*(int64_t *) registers[*(uint64_t *) inst->val2] != 1)
                     num_of_instr += *(int64_t*)inst->val1;
                 break;
             case 20:
-                if (*(int64_t *) registers[*(u_int64_t *) inst->val2] != 0)
+                if (*(int64_t *) registers[*(uint64_t *) inst->val2] != 0)
                     num_of_instr += *(int64_t*)inst->val1;
                 break;
             case 21:
-                //std::cout << *(int64_t *) registers[*(u_int64_t *) inst->val2] << std::endl;
-                if (*(int64_t *) registers[*(u_int64_t *) inst->val2] >= 0)
+                //std::cout << *(int64_t *) registers[*(uint64_t *) inst->val2] << std::endl;
+                if (*(int64_t *) registers[*(uint64_t *) inst->val2] >= 0)
                     num_of_instr += *(int64_t*)inst->val1;
                 break;
             case 22:
-                if (*(int64_t *) registers[*(u_int64_t *) inst->val2] <= 0)
+                if (*(int64_t *) registers[*(uint64_t *) inst->val2] <= 0)
                     num_of_instr += *(int64_t*)inst->val1;
                 break;
             case 23:
@@ -136,36 +136,36 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
                 break;
 
             case 24:
-                if (*(int64_t*)registers[*(u_int64_t*)inst->val1] != 0)
-                    *(int64_t*)registers[*(u_int64_t*)inst->val2] = 1;
+                if (*(int64_t*)registers[*(uint64_t*)inst->val1] != 0)
+                    *(int64_t*)registers[*(uint64_t*)inst->val2] = 1;
                 else
-                    *(int64_t*)registers[*(u_int64_t*)inst->val2] = 0;
+                    *(int64_t*)registers[*(uint64_t*)inst->val2] = 0;
                 break;
             case 25: {
-                if (*(u_int64_t*) registers[*(u_int64_t *) inst->val1] and
-                        *(u_int64_t*) registers[*(u_int64_t *) inst->val2])
-                    *(u_int64_t*) registers[*(u_int64_t *) inst->val2] = 1;
+                if (*(uint64_t*) registers[*(uint64_t *) inst->val1] and
+                        *(uint64_t*) registers[*(uint64_t *) inst->val2])
+                    *(uint64_t*) registers[*(uint64_t *) inst->val2] = 1;
                 else
-                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 0;
+                    *(uint64_t *) registers[*(uint64_t *) inst->val2] = 0;
                 break;
             }
             case 26: {
-                if (*(u_int64_t *) registers[*(u_int64_t *) inst->val1] or
-                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2])
-                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 1;
+                if (*(uint64_t *) registers[*(uint64_t *) inst->val1] or
+                    *(uint64_t *) registers[*(uint64_t *) inst->val2])
+                    *(uint64_t *) registers[*(uint64_t *) inst->val2] = 1;
                 else
-                    *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = 0;
+                    *(uint64_t *) registers[*(uint64_t *) inst->val2] = 0;
                 break;
             }
             case 27:
-                *(u_int64_t *) registers[*(u_int64_t *) inst->val2] = !*(u_int64_t *) registers[*(u_int64_t *) inst->val1];
+                *(uint64_t *) registers[*(uint64_t *) inst->val2] = !*(uint64_t *) registers[*(uint64_t *) inst->val1];
                 break;
             case 50:
-                std::cout << *(int64_t*)registers[*(u_int64_t*)inst->val1] << std::endl;
+                std::cout << *(int64_t*)registers[*(uint64_t*)inst->val1] << std::endl;
                 break;
             case 51:
-                registers[*(u_int64_t*)inst->val2] = malloc(8);
-                *(int64_t*)registers[*(u_int64_t*)inst->val2] = *(int64_t*)inst->val1;
+                registers[*(uint64_t*)inst->val2] = malloc(8);
+                *(int64_t*)registers[*(uint64_t*)inst->val2] = *(int64_t*)inst->val1;
                 //free(inst->val1);
                 break;
 
@@ -173,10 +173,10 @@ VirtualMachine_NC_BYTE::VirtualMachine_NC_BYTE (VirtualMachine_NC_BYTE::ASM_Inst
     }
 }
 
-inline u_int64_t VirtualMachine_NC_BYTE::binarySearchinHeapNull(heapNullChunk *arr, u_int64_t arr_size, u_int64_t chunk_pos) {
-    /*u_int64_t left = 0;
-    u_int64_t right = 5;
-    u_int64_t middle = left + (right - left) / 2;
+inline uint64_t VirtualMachine_NC_BYTE::binarySearchinHeapNull(heapNullChunk *arr, uint64_t arr_size, uint64_t chunk_pos) {
+    /*uint64_t left = 0;
+    uint64_t right = 5;
+    uint64_t middle = left + (right - left) / 2;
 
     while (true) {
         if (arr[middle].pos < chunk_pos)
@@ -187,9 +187,9 @@ inline u_int64_t VirtualMachine_NC_BYTE::binarySearchinHeapNull(heapNullChunk *a
             return middle;
     }*/
 
-    u_int64_t l = 0;
-    u_int64_t r = 1; // в этом случае присваивается именно n
-    u_int64_t mid;
+    uint64_t l = 0;
+    uint64_t r = 1; // в этом случае присваивается именно n
+    uint64_t mid;
 
     while (l < r) {
         mid = (l + r) / 2; // считываем срединный индекс отрезка [l,r]

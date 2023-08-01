@@ -39,8 +39,6 @@
  * 51 - set val as new
 */
 
-typedef uint64_t u_int64_t;
-typedef uint16_t u_int16_t;
 
 class VirtualMachine_NC_BYTE {
 public:
@@ -57,14 +55,14 @@ public:
                            unsigned long long stack_size, unsigned short heap_chunk);
 private:
     struct heapNullChunk {
-        u_int16_t count = 0;
-        u_int64_t pos:48;
+        uint16_t count = 0;
+        uint64_t pos:48;
     };
 
     struct varsBind {
-        u_int64_t name;
-        u_int64_t index;
+        uint64_t name;
+        uint64_t index;
     };
 
-    inline u_int64_t binarySearchinHeapNull(heapNullChunk *arr, u_int64_t arr_size, u_int64_t chunk_pos) ;
+    inline uint64_t binarySearchinHeapNull(heapNullChunk *arr, uint64_t arr_size, uint64_t chunk_pos) ;
 };

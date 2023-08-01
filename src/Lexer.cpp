@@ -1,142 +1,17 @@
 #include "main.h"
+#include "Error.h"
 #include "Lexer.h"
 
 static void add_info_to_temp_vectors(std::vector<std::string> &tok_vec, std::vector<std::string> &tok_info_vec, std::string token, std::string token_info);
 
-//#define ADD_TOKEN_TO_TMPVEC(TOKEN, INFO) add_info_to_temp_vectors(tempVecTok, tempVecTokInfo, TOKEN, INFO)
-
-Lexer::Lexer(std::string sourceCode)
+Lexer::Lexer(std::vector<std::vector<std::string>> processed_source)
 {
-    // Деление исходного кода на строки
-    std::string temp_str = "";
-    std::vector <std::string> separated_sourceCode;
-    for (unsigned long long char_num = 0; char_num < sourceCode.length(); ++char_num)
-    {
-        // Парсинг выражений, не заканчивающихся на ";"
-        if (sourceCode[char_num] == '/' and (char_num < sourceCode.length()-1 and sourceCode[char_num+1] == '/'))
-        {
-            while (sourceCode[char_num] != '\n' and char_num < sourceCode.length())
-                ++char_num;
-        }
-
-        if (sourceCode[char_num] == '/' and (char_num < sourceCode.length()-1 and sourceCode[char_num+1] == '*')) {
-            while (char_num < sourceCode.length()-1 and not (sourceCode[char_num] == '*' and sourceCode[char_num+1] == '/'))
-                ++char_num;
-            char_num += 2;
-        }
-
-        //TODO: Здесь пропускает строки начинающиеся с решётки, чтобы компилтор на ругался на define
-        if (sourceCode[char_num] == '#') {
-            while (sourceCode[char_num] != '\n' and char_num < sourceCode.length())
-                ++char_num;
-        }
-
-        // Основной парсинг
-        if (sourceCode[char_num] == ';') {
-            separated_sourceCode.push_back(temp_str);
-            temp_str = "";
-        }
-        else if (sourceCode[char_num] == '{' or sourceCode[char_num] == '}') {
-            temp_str += sourceCode[char_num];
-            separated_sourceCode.push_back(temp_str);
-            temp_str = "";
-        }
-        else {
-            if (sourceCode[char_num] == '\n' or sourceCode[char_num] == '\t')
-                temp_str += " ";
-            else
-                temp_str += sourceCode[char_num];
-        }
-    }
-    
-    // Удалет лишние пробелы и добавляет пробелы между символами != цифрам, маленьким и большим буквам (ASCII)
-    for (std::string &sepr_str : separated_sourceCode)
-    {
-        // Добавляет пробелы между определёнными символами
-        temp_str = "";
-        for(unsigned long long char_num = 0; char_num < sepr_str.length(); ++char_num)
-        {
-            char ascii_num = sepr_str[char_num];
-            if (not ((ascii_num > 47 and ascii_num < 58) or (ascii_num > 64 and ascii_num < 91) or
-                     (ascii_num > 96 and ascii_num < 123)) and ascii_num != ' ')
-            {
-                temp_str.append(" ");
-                if (((ascii_num > 60 and ascii_num < 63) or ascii_num == '!') and char_num+1 < sepr_str.length() and sepr_str[char_num+1] == '=')
-                {
-                    ++char_num;
-                    temp_str += sepr_str[char_num-1];
-                    temp_str += sepr_str[char_num];
-                }
-                else
-                    temp_str.push_back(ascii_num);
-                temp_str.append(" ");
-            }
-            else
-                temp_str += sepr_str[char_num];
-        }
-        sepr_str = temp_str;
-        
-        // Удаляет лишние пробелы
-        temp_str = "";
-        unsigned int space_count = 0;
-        for (unsigned long long char_num = 0; char_num < sepr_str.length(); ++char_num)
-        {
-            sepr_str[char_num]==' ' ? ++space_count : space_count=0;
-            if (space_count < 2)
-                temp_str += sepr_str[char_num];
-        }
-        
-        if (temp_str[0] == ' ') 
-            temp_str.erase(temp_str.begin());
-        if (temp_str[temp_str.length()-1] == ' ')
-            temp_str.erase(temp_str.end() - 1);
-
-        sepr_str = temp_str;
-    }
-
-    // Разделение строки по пробелам
-    temp_str.clear();
-    std::vector <std::vector<std::string>> separated_sourceCodeString;
-    for (std::string &sepr_str : separated_sourceCode)
-    {
-        std::vector <std::string> temp_vec;
-        for (unsigned long long char_num = 0; char_num < sepr_str.length(); ++char_num)
-        {
-            if (sepr_str[char_num] == ' ' or sepr_str[char_num] == ',' or char_num == sepr_str.length() - 1)
-            {
-                if (char_num == sepr_str.length() - 1) temp_str.push_back(sepr_str[char_num]);
-                if (temp_str != "") {
-                    temp_vec.push_back(temp_str);
-                    temp_str.clear();
-                }
-                if (sepr_str[char_num] == ',')
-                    temp_vec.push_back("SEPARATOR");
-            }
-            else
-                temp_str.push_back(sepr_str[char_num]);
-        }
-        separated_sourceCodeString.push_back(temp_vec);
-    }
-
-
-    // Простейший препроцессинг
-    for (std::vector <std::string> &splitted : separated_sourceCodeString) {
-        for (u_int32_t str_num = 0; str_num < splitted.size(); ++str_num) {
-            if (splitted[str_num] == "true") {
-                splitted[str_num] = "1";
-            }
-            else if (splitted[str_num] == "false") {
-                splitted[str_num] = "0";
-            }
-        }
-    }
-
     // Лексинг строк
     bool is_function_definition = false;
     int is_function_call = 0;
     bool is_args = false;
-    u_int64_t string_num = 0;
-    for (std::vector <std::string> &splitted : separated_sourceCodeString)
+    uint64_t string_num = 0;
+    for (std::vector <std::string> &splitted : processed_source)
     {
         bool second_exp_part = false;
         bool is_condition = false;
@@ -147,7 +22,7 @@ Lexer::Lexer(std::string sourceCode)
 
         ++string_num;
         Expression temp_expression;
-        for (u_int32_t str_num = 0; str_num < splitted.size(); ++str_num)
+        for (uint32_t str_num = 0; str_num < splitted.size(); ++str_num)
         {
             std::string exp_string = splitted[str_num];
             if (exp_string == "(") {
@@ -163,7 +38,7 @@ Lexer::Lexer(std::string sourceCode)
                     is_condition = false;
                     is_args = false;
                 }
-                else if ((str_num < splitted.size()-1 and splitted[str_num+1] == "{" and is_function_definition)) {
+                else if (is_function_definition) {
                     ADD_TOKEN_TO_TMPVEC("ARGS_END", "~~~");
                     is_function_definition = false;
                     is_args = false;
@@ -177,7 +52,14 @@ Lexer::Lexer(std::string sourceCode)
                     ADD_TOKEN_TO_TMPVEC("RBRAC_END", "~~~");
             }
 
-            else if (exp_string == "SEPARATOR")
+            else if (exp_string == "[") {
+                ADD_TOKEN_TO_TMPVEC("SBRAC_BEGIN", "~~~");
+            }
+            else if (exp_string == "]") {
+                ADD_TOKEN_TO_TMPVEC("SBRAC_END", "~~~");
+            }
+
+            else if (exp_string == ",")
                 ADD_TOKEN_TO_TMPVEC("SEPARATOR", "~~~");
 
             else if (exp_string == "{")
@@ -189,6 +71,25 @@ Lexer::Lexer(std::string sourceCode)
                 ADD_TOKEN_TO_TMPVEC("ASSIGN", "~~~");
                 second_exp_part = true;
             }
+            else if (exp_string == "+=" or exp_string == "-=" or exp_string == "*=" or exp_string == "/=" or exp_string == "%=") {
+                if (str_num-1 >= 0 and isNormString(splitted[str_num-1]) == 1) {
+                    ADD_TOKEN_TO_TMPVEC("ASSIGN", "~~~");
+                    ADD_TOKEN_TO_TMPVEC("VAR_NAME", splitted[str_num-1]);
+                    if (exp_string == "+=")
+                        ADD_TOKEN_TO_TMPVEC("ADD", "~~~");
+                    else if (exp_string == "-=")
+                        ADD_TOKEN_TO_TMPVEC("MINUS", "~~~");
+                    else if (exp_string == "*=")
+                        ADD_TOKEN_TO_TMPVEC("MULTIPLE", "~~~");
+                    else if (exp_string == "/=")
+                        ADD_TOKEN_TO_TMPVEC("DIVIDE", "~~~");
+                    else if (exp_string == "%=")
+                        ADD_TOKEN_TO_TMPVEC("MOD", "~~~");
+                }
+                else {
+
+                }
+            }
             else if (exp_string == "+")
                 ADD_TOKEN_TO_TMPVEC("ADD", "~~~");
             else if (exp_string == "-")
@@ -197,6 +98,8 @@ Lexer::Lexer(std::string sourceCode)
                 ADD_TOKEN_TO_TMPVEC("MULTIPLE", "~~~");
             else if (exp_string == "/")
                 ADD_TOKEN_TO_TMPVEC("DIVIDE", "~~~");
+            else if (exp_string == "%")
+                ADD_TOKEN_TO_TMPVEC("MOD", "~~~");
 
             else if (exp_string == "<")
                 ADD_TOKEN_TO_TMPVEC("LLESS", "~~~");
@@ -268,14 +171,10 @@ Lexer::Lexer(std::string sourceCode)
                 }
             }
 
-            // Определяет числовую константу
+                // Определяет числовую константу
             else if (isNumber(exp_string))
             {
-                if (str_num < splitted.size()-2 and (splitted[str_num+1] == "." and isNumber(splitted[str_num+2]))) {
-                    ADD_TOKEN_TO_TMPVEC("VALUE", exp_string + "." + splitted[string_num+2]);
-                    str_num += 2;
-                }
-                else if (str_num < splitted.size()-2 and (splitted[str_num+1] == "." and !isNumber(splitted[str_num+2]))) {
+                if (str_num < splitted.size()-2 and (splitted[str_num+1] == "." and !isNumber(splitted[str_num+2]))) {
                     std::cout << "Syntax error: \"" << splitted[str_num+2] << "\" - is not a number" << std::endl;
                     exit(-1);
                 }
@@ -284,12 +183,20 @@ Lexer::Lexer(std::string sourceCode)
                     exit(-1);
                 }
                 else {
-                    ADD_TOKEN_TO_TMPVEC("VALUE", exp_string);
-                    continue;
+                    if (exp_string[0] == '.')
+                        ADD_TOKEN_TO_TMPVEC("VALUE", "0" + exp_string);
+                    else if (exp_string[exp_string.size()-1] == '.')
+                        ADD_TOKEN_TO_TMPVEC("VALUE", exp_string + "0");
+                    else
+                        ADD_TOKEN_TO_TMPVEC("VALUE", exp_string);
                 }
             }
 
-            // Определяет тип переменной
+            else if (exp_string.size() > 1 and exp_string[0] == '"' and exp_string[exp_string.size()-1] == '"') {
+                ADD_TOKEN_TO_TMPVEC("VALUE", std::string(exp_string.begin()+1, exp_string.end()-1));
+            }
+
+                // Определяет тип переменной
             else if (findB(std::begin(var_types), std::end(var_types), exp_string))
             {
                 if (temp_expression.var_type == "" and not (is_args and is_function_definition)) {
@@ -309,9 +216,9 @@ Lexer::Lexer(std::string sourceCode)
                 }
             }
 
-            // Определяет имя переменной
+                // Определяет имя переменной
             else if (isNormString(exp_string) == 1 and ((str_num < splitted.size()-1 and splitted[str_num+1] != "(") or
-                str_num == splitted.size()-1))
+                                                        str_num == splitted.size()-1))
             {
                 ADD_TOKEN_TO_TMPVEC("VAR_NAME", exp_string);
                 temp_expression.var_name = exp_string;
@@ -328,7 +235,7 @@ Lexer::Lexer(std::string sourceCode)
                 exit(-1);
             }
 
-            // Function
+                // Function
             else if (isNormString(exp_string) == 1 and (str_num < splitted.size()-1 and splitted[str_num+1] == "("))
             {
                 if (str_num > 0 and findB(std::begin(var_types), std::end(var_types), splitted[str_num-1])){
@@ -354,6 +261,7 @@ Lexer::Lexer(std::string sourceCode)
                 std::cout << "Lexer Error: Unknown token - \"" << exp_string << "\"" << std::endl;
                 exit(1);
             }
+            //std::cout << exp_string << "#";
 
         }
         lexedSourceCode.push_back(temp_expression);
@@ -362,27 +270,25 @@ Lexer::Lexer(std::string sourceCode)
         TokensInfo.push_back(tempVecTokInfo);
     }
 
-    for (u_int64_t n1=0; n1 < TokenizedSource.size(); ++n1)
+    for (uint64_t n1=0; n1 < TokenizedSource.size(); ++n1)
     {
         std::cout << n1 << " -- ";
-        for (u_int64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
+        for (uint64_t n2=0; n2 < TokenizedSource[n1].size(); ++n2)
         {
             std::cout << TokenizedSource[n1][n2] << " ";
             if (TokensInfo[n1][n2] != "~~~")
-                std::cout << TokensInfo[n1][n2] << " ";
+                std::cout << "(" << TokensInfo[n1][n2] << ") ";
         }
         std::cout << "\n";
     }
     //std::cout << this->lexedString << std::endl;
 
 }
-std::vector<std::vector<std::string>> Lexer::getTokenizedSource()
-{
+std::vector<std::vector<std::string>> Lexer::getTokenizedSource() {
     return TokenizedSource;
 }
 
-std::vector<std::vector<std::string>> Lexer::getTokensInfo()
-{
+std::vector<std::vector<std::string>> Lexer::getTokensInfo() {
     return TokensInfo;
 }
 
@@ -416,14 +322,21 @@ int8_t Lexer::isNormString(std::string &str)
 
 bool Lexer::isNumber(std::string &str)
 {
+    uint32_t dot_count = 0;
     for (char ascii_num : str)
     {
-        if (not (ascii_num > 47 and ascii_num < 58))
+        if (ascii_num == '.')
+            ++dot_count;
+        else if (not (ascii_num > 47 and ascii_num < 58))
             return false;
     }
 
-    return true;
+    if (dot_count <= 1)
+        return true;
+    else
+        Error::throwError("The number \"" + str + "\" contains too many dots");
 }
+
 
 static void add_info_to_temp_vectors(std::vector<std::string> &tok_vec, std::vector<std::string> &tok_info_vec, std::string token, std::string token_info)
 {

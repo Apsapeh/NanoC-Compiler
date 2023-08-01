@@ -1,0 +1,5 @@
+target("NanoC_Compiler")
+    set_languages("cxx11")
+    set_kind("binary")
+    add_files("src/*.cpp")
+    add_cxxflags("/Za", {tools = {"clang_cl", "cl"}})
