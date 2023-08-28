@@ -22,5 +22,6 @@ private:
     std::vector<std::string> parseDefineString(std::vector<std::string> &line, uint32_t &wordIndex, DefineStruct defineData);
     std::vector<std::string> changeDefineToString(DefineStruct def_data, std::vector<std::string> &args_line);
     int64_t getDefineIndex(std::string str, std::vector<DefineStruct> *def_vec);
+
 };
 

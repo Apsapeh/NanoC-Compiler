@@ -1,3 +1,15 @@
-int a_b[3] = {1, 2, 3};
+//int main(){
+/*unsigned int a_b[3] = {1, 2, 3};
 a_b[0] = 4;
-print(a_b[1]);
+print(a_b[1]);*/
+//}
+
+struct A {
+    int a;
+};
+
+int main() {
+    A a = {3};
+    a.a = 5;
+    float f = 3.5;
+}

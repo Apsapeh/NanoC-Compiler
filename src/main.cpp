@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 
     PreProcessor preProcessor(source_code);
     Lexer lexer(preProcessor.getProcessedSourceVecLines());
-    Parser parser(lexer.getTokenizedSource(), lexer.getTokensInfo());
+    Parser parser(lexer.getLexedSource());
     //Compiler_to_NCASM comp_to_ncasm(parser.getParsedProgram());
     //Compiler_NCASM_to_ByteCode comp_ncasm_to_byte(comp_to_ncasm.getCompiledCode());
     //comp_ncasm_to_byte.saveCompiledProgram_to_file("asm.asm");

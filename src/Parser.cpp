@@ -4,158 +4,23 @@ typedef Parser::Node Node;
 static void recursionNodePrint (Node *node, uint32_t &n_c);
 
 
-Parser::Parser(std::vector<std::vector<std::string>> TokenizedSource,
-               std::vector<std::vector<std::string>> TokensInfo)
-{
-    Node* Program = new Node; Program->Type = "Program"; Program->Mother = Program;
-    Node *MotherNode = Program;
+Parser::Parser(std::vector<std::vector<Lexer::Token>> &data) {
+    std::vector<struct_info> structs;
+    std::vector<func_info> functions;
+    std::vector<var_info> vars;
+    std::vector<var_type> types = {
+            {"float", "float"}, {"double", "double"}, {"char", "char"},
+            {"short", "short"}, {"int", "int"}, {"long", "long"}
+    };
 
-    //Node *tempN;
-    std::string tmp_string = "";
-    for (uint32_t line_num=0; line_num < TokenizedSource.size(); ++line_num)
-    {
-        std::vector<std::string> &VecLine = TokenizedSource[line_num];
-        std::vector<std::string> &VecLineInfo = TokensInfo[line_num];
-        for (uint32_t token_num=0; token_num < VecLine.size(); ++token_num)
-        {
-            std::string &Token = VecLine[token_num];
-            std::string &Info = VecLineInfo[token_num];
-
-            //std::cout << Token << " ";
-            // TODO: Заменить добавление в материнскую ноду на функцию
-            if (Token == "FN_DEF" or Token == "FN_CALL" or Token == "IF" or Token == "ELSE" or Token == "WHILE")
-            {
-                if (Token == "FN_CALL") {
-                    int count_of_argsBr = 1;
-                    int fn_call_start = token_num+2;
-                    for (uint32_t i = token_num + 2; i < VecLine.size(); ++i) {
-                        if (VecLine[i] == "ARGS_BEGIN") {
-                            //fn_call_start = i + 1;
-                            ++count_of_argsBr;
-                        } else if (VecLine[i] == "ARGS_END")
-                            --count_of_argsBr;
-
-                        if (count_of_argsBr == 0) {
-                            MotherNode->kind.push_back(recursionFuncParser(
-                                    std::vector<std::string>(VecLine.begin() + fn_call_start, VecLine.begin() + i),
-                                    std::vector<std::string>(VecLineInfo.begin() + fn_call_start, VecLineInfo.begin() + i), VecLineInfo[token_num])
-                            );
-                            token_num = i;
-                            break;
-                        }
-                    }
-                    continue;
-                }
-
-                if (Info != "~~~")
-                    tmp_string = Info;
-                else
-                    tmp_string = "";
-
-                MotherNode = addNode(Token, tmp_string, MotherNode);
-
-                if (Token == "FN_DEF" and token_num > 0 and *(&Token-1) == "VAR_TYPE")
-                    addNode("RETURNING_TYPE", *(&Info-1), MotherNode);
-
-                else if (Token == "FN_DEF" and not (token_num > 0 and *(&Token-1) == "VAR_TYPE")) {
-                    std::cout << "Error: The return type of the function is undefined\n";
-                    exit(-1);
-                }
-                //std::cout << Info << std::endl;
-            }
-            else if (Token == "ARGS_BEGIN" or Token == "COND_BEGIN")
-            {
-                if (token_num > 0 and *(&Token-1) == "FN_CALL")
-                    continue;
-
-                Node* tempN = addNode("ARGS", "", MotherNode);
-
-                if (token_num > 0 and (*(&Token-1) == "IF" or *(&Token-1) == "WHILE")) {
-                    int count_of_argsBr = 1;
-                    int fn_call_start = token_num+1;
-                    for (uint32_t i = token_num + 1; i < VecLine.size(); ++i) {
-                        if (VecLine[i] == "COND_BEGIN")
-                            ++count_of_argsBr;
-                        else if (VecLine[i] == "COND_END")
-                            --count_of_argsBr;
-
-                        if (count_of_argsBr == 0) {
-                            tempN->kind.push_back(recursionMathParser(
-                                std::vector<std::string>(VecLine.begin() + fn_call_start, VecLine.begin() + i),
-                                std::vector<std::string>(VecLineInfo.begin() + fn_call_start, VecLineInfo.begin() + i), MotherNode)
-                            );
-                            token_num = i;
-                            break;
-                        }
-                    }
-                    continue;
-                }
-                else
-                    MotherNode = tempN;
-
-            }
-            else if (Token == "ARGS_END" or Token == "COND_END" or Token == "END") {
-                MotherNode = MotherNode->Mother;
-            }
-
-            else if (Token == "VAR_TYPE" and MotherNode->Type == "ARGS") {
-                MotherNode = addNode("ARG", "", MotherNode);
-                addNode(Token, Info, MotherNode);
-
-                if (not (token_num < VecLine.size() - 1 and *(&Token+1) == "VAR_NAME")) {
-                    std::cout << "Error: Argument name is not set\n";
-                    exit(-1);
-                }
-
-                addNode(*(&Token+1), *(&Info+1), MotherNode);
-                MotherNode = MotherNode->Mother;
-                ++token_num;
-            }
-
-            else if ((Token == "VAR_NAME" or Token == "VALUE") and (MotherNode->Type == "ARGS" or MotherNode->Type == "FN_CALL"))
-                addNode(Token, Info, MotherNode);
+    for (u_int64_t line_num = 0; line_num < data.size(); ++line_num) {
+        std::vector<Lexer::Token> &line = data[line_num];
+        for (u_int64_t token_num = 0; token_num < line.size(); ++token_num) {
+            Lexer::Token &token = line[token_num];
 
 
-            else if (Token == "VAR_TYPE" and not (token_num+1 < VecLine.size() and *(&Token+1) == "FN_DEF")) {
-                MotherNode = addNode("DEFINE_VAR", "", MotherNode);
-                addNode(Token, Info, MotherNode);
-
-                if (token_num+1 < VecLine.size() and *(&Token+1) == "VAR_NAME")
-                    addNode(*(&Token+1), *(&Info+1), MotherNode);
-
-                else {
-                    std::cout << "error\n";
-                    exit(1);
-                }
-
-                MotherNode = MotherNode->Mother;
-            }
-
-            else if (Token == "ASSIGN") {
-                Node* tempN = addNode(Token, "", MotherNode);
-
-                if (token_num > 0 and *(&Token-1) == "VAR_NAME") {
-                    Node *tmp = new Node;
-                    tmp->Type = "VAR_NAME";
-                    tmp->Info = *(&Info-1);
-                    tempN->kind.push_back(tmp);
-                } else {
-                    std::cout << "error\n";
-                    exit(1);
-                }
-                tempN->kind.push_back(recursionMathParser(std::vector<std::string> (VecLine.begin()+token_num+1, VecLine.end()),
-                                                          std::vector<std::string> (VecLineInfo.begin()+token_num+1, VecLineInfo.end()), MotherNode));
-
-                break;
-            }
-
-            else if (Token == "BREAK")
-                addNode(Token, "", MotherNode);
         }
     }
-    ParsedProgram = Program;
-    uint32_t kind_counter = 0;
-    recursionNodePrint(Program, kind_counter);
 }
 
 Node *Parser::getParsedProgram() {

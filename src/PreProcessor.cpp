@@ -55,7 +55,7 @@ PreProcessor::PreProcessor(std::string source) {
 
     // Делим строку на слова
     char sep_by_ch[] = {
-            '(', ')', '[', ']', ';', ',',
+            '(', ')', '[', ']', ';', ',', '.',
             '{', '}', '=', '+', '-', '*',
             '/', '%'
     };
@@ -70,10 +70,12 @@ PreProcessor::PreProcessor(std::string source) {
                 is_string = not is_string;
 
             if ((ch == ' ' or std::find(std::begin(sep_by_ch), std::end(sep_by_ch), ch) != std::end(sep_by_ch)) and not is_string) {
-                if (not tmpStr.empty()) {
+                if (not tmpStr.empty() and tmpStr != "unsigned") {
                     tmpVec.push_back(tmpStr);
                     tmpStr.clear();
                 }
+                else if (tmpStr == "unsigned")
+                    tmpStr.push_back(' ');
 
                 if (tmpVec.size() == 2 and tmpVec[0] == "#define" and ch == '(' and *(&ch -1) != ' ') {
                     tmpVec.push_back("_");
@@ -200,6 +202,7 @@ PreProcessor::PreProcessor(std::string source) {
     }
 
     resultVec.shrink_to_fit();
+
     for (std::string str : resultVec) {
         std::cout << str << " ";
     }
@@ -291,6 +294,7 @@ int64_t PreProcessor::getDefineIndex(std::string str, std::vector<DefineStruct> 
 }
 
 
+
 //////  PUBLIC:
 
 std::vector<std::string> PreProcessor::getProcessedSourceVec() {
@@ -334,9 +338,9 @@ std::vector<std::vector<std::string>> PreProcessor::getProcessedSourceVecLines()
 
     for (auto a : result) {
         for (auto b : a) {
-            std::cout << b << " ";
+            //std::cout << b << " ";
         }
-        std::cout << "\n";
+        //std::cout << "\n";
     }
 
     return result;

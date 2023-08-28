@@ -3,23 +3,44 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "Lexer.h"
 
 class Parser {
 public:
     struct Node
     {
-        //std::string str = "";
         std::string Type = "";
         std::string Info = "";
         std::vector<Node*> kind;
         Node *Mother = nullptr;
     };
 
-    Parser(std::vector<std::vector<std::string>> TokenizedSource,
-           std::vector<std::vector<std::string>> TokensInfo);
+    Parser(std::vector<std::vector<Lexer::Token>> &data);
 
     Node* getParsedProgram();
 private:
+    struct var_type {
+        std::string old;
+        std::string new;
+    };
+
+    struct var_info {
+        std::string name;
+        std::string type;
+    };
+
+    struct func_info {
+        std::string name;
+        std::vector<var_info> args;
+        std::string return_type;
+    };
+
+    struct struct_info {
+        std::string name;
+        std::vector<var_info> members;
+        std::vector<func_info> functions;
+    };
+
     Node* ParsedProgram;
     Node* addNode(std::string type, std::string info = "", Node* mother_node = nullptr, bool add_to_mother = true);
 
